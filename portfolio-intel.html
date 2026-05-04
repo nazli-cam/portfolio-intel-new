@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Portfolio Intel</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff;
+    --bg2: #f7f7f5;
+    --bg3: #f0efe9;
+    --text: #1a1a1a;
+    --text2: #555550;
+    --text3: #999990;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --bg2: #242424;
+      --bg3: #2e2e2e;
+      --text: #f0f0ee;
+      --text2: #aaaaaa;
+      --text3: #666666;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.18);
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg3);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    padding: 0 24px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -.4px; }
+  .logo span { font-weight: 400; color: var(--text3); font-size: 12px; margin-left: 6px; }
+  .topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .back-btn {
+    display: none; align-items: center; gap: 5px;
+    font-size: 12px; color: var(--text2); cursor: pointer;
+    padding: 5px 10px; border-radius: var(--radius);
+    border: 0.5px solid var(--border2); background: transparent;
+  }
+  .back-btn:hover { background: var(--bg2); }
+  .btn {
+    font-size: 12px; padding: 6px 13px;
+    border-radius: var(--radius); border: 0.5px solid var(--border2);
+    background: transparent; color: var(--text2); cursor: pointer;
+  }
+  .btn:hover { background: var(--bg2); }
+  .btn.pri { background: var(--text); color: var(--bg); border-color: transparent; }
+  .btn.pri:hover { opacity: .88; }
+
+  /* ── PAGES ── */
+  .page { display: none; max-width: 960px; margin: 0 auto; padding: 24px 20px; }
+  .page.active { display: block; }
+
+  /* ── LIST PAGE ── */
+  .page-header { margin-bottom: 18px; }
+  .page-title { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--text3); }
+
+  .filter-row { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .chip {
+    font-size: 11px; padding: 4px 11px; border-radius: 20px;
+    border: 0.5px solid var(--border2); background: transparent;
+    color: var(--text2); cursor: pointer; transition: all .15s;
+  }
+  .chip.on { background: var(--text); color: var(--bg); border-color: transparent; }
+
+  .co-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .co-card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color .15s, transform .1s;
+  }
+  .co-card:hover { border-color: var(--border2); transform: translateY(-1px); }
+  .co-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+  .co-av {
+    width: 38px; height: 38px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; flex-shrink: 0;
+  }
+  .co-card-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .co-card-meta { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .co-pills { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+  .pill {
+    font-size: 10px; padding: 2px 8px; border-radius: 8px; font-weight: 500;
+    display: inline-block;
+  }
+  .p-green { background: #eaf3de; color: #27500a; }
+  .p-amber { background: #faeeda; color: #633806; }
+  .p-gray  { background: #f1efe8; color: #444441; }
+  .p-blue  { background: #e6f1fb; color: #0c447c; }
+  .p-red   { background: #fcebeb; color: #a32d2d; }
+  .co-snippet { font-size: 11px; color: var(--text2); line-height: 1.5; border-top: 0.5px solid var(--border); padding-top: 10px; }
+
+  /* ── DETAIL PAGE ── */
+  .detail-header {
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px;
+  }
+  .dh-row { display: flex; align-items: flex-start; gap: 14px; }
+  .dh-av { width: 52px; height: 52px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; flex-shrink: 0; }
+  .dh-info { flex: 1; }
+  .dh-name { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .dh-meta { font-size: 12px; color: var(--text2); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .dh-link { color: #185fa5; text-decoration: none; font-size: 11px; }
+  .dh-link:hover { text-decoration: underline; }
+  .dh-right { flex-shrink: 0; }
+
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  @media (max-width: 640px) { .detail-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 16px;
+  }
+  .card-title {
+    font-size: 11px; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px;
+  }
+
+  /* Signals */
+  .sig-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); align-items: flex-start; }
+  .sig-item:last-child { border-bottom: none; }
+  .sig-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .sig-body { flex: 1; }
+  .sig-title { font-size: 12px; color: var(--text); line-height: 1.4; margin-bottom: 3px; }
+  .sig-meta { font-size: 10px; color: var(--text3); display: flex; gap: 6px; align-items: center; }
+  .sig-score { margin-left: auto; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 7px; background: var(--bg2); color: var(--text2); flex-shrink: 0; }
+
+  /* Hiring */
+  .hire-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .hire-item { border: 0.5px solid var(--border); border-radius: var(--radius); padding: 9px 11px; }
+  .hire-title { font-size: 12px; font-weight: 500; color: var(--text); }
+  .hire-dept { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  /* AI Chat */
+  .chat-wrap {
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 14px;
+  }
+  .chat-msgs { padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 180px; max-height: 380px; overflow-y: auto; }
+  .msg { display: flex; gap: 8px; align-items: flex-start; }
+  .msg.u { flex-direction: row-reverse; }
+  .m-av {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; flex-shrink: 0;
+  }
+  .ai-av { background: #e6f1fb; color: #0c447c; }
+  .u-av { background: #eaf3de; color: #27500a; }
+  .bubble {
+    max-width: 82%; padding: 9px 13px; border-radius: var(--radius-lg);
+    font-size: 12px; line-height: 1.6; color: var(--text);
+    border: 0.5px solid var(--border);
+  }
+  .msg.u .bubble { background: var(--bg2); border-color: transparent; }
+  .chat-sugs { display: flex; gap: 5px; flex-wrap: wrap; padding: 0 16px 12px; }
+  .sug {
+    font-size: 11px; padding: 4px 10px; border-radius: 14px;
+    border: 0.5px solid var(--border2); background: transparent;
+    color: var(--text2); cursor: pointer;
+  }
+  .sug:hover { background: var(--bg2); }
+  .chat-input-row { border-top: 0.5px solid var(--border); display: flex; }
+  .chat-inp {
+    flex: 1; padding: 11px 14px; border: none; background: transparent;
+    font-size: 12px; color: var(--text); font-family: inherit;
+  }
+  .chat-inp:focus { outline: none; }
+  .chat-send {
+    padding: 11px 16px; border: none; border-left: 0.5px solid var(--border);
+    background: transparent; font-size: 12px; color: var(--text2); cursor: pointer;
+  }
+  .chat-send:hover { background: var(--bg2); }
+
+  /* Email alerts */
+  .email-section {
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 16px; margin-bottom: 14px;
+  }
+  .email-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .email-input {
+    flex: 1; padding: 8px 11px; border: 0.5px solid var(--border2);
+    border-radius: var(--radius); font-size: 12px; background: var(--bg);
+    color: var(--text); font-family: inherit;
+  }
+  .email-input:focus { outline: none; border-color: var(--text3); }
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0; border-bottom: 0.5px solid var(--border);
+    font-size: 12px; color: var(--text);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .tog {
+    width: 34px; height: 19px; border-radius: 10px; background: var(--border2);
+    position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0;
+  }
+  .tog.on { background: #1d9e75; }
+  .tog-dot {
+    width: 13px; height: 13px; border-radius: 50%; background: white;
+    position: absolute; top: 3px; left: 3px; transition: left .2s;
+  }
+  .tog.on .tog-dot { left: 18px; }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin-bottom: 14px;
+  }
+  .stat {
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg); padding: 13px 15px;
+  }
+  .stat-label { font-size: 10px; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
+  .stat-val { font-size: 20px; font-weight: 600; color: var(--text); }
+  .stat-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+  .up { color: #1d9e75; } .dn { color: #d85a30; }
+
+  /* Modal */
+  .modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.35); z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--bg); border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border2); padding: 24px; width: 460px;
+    max-width: 94vw; max-height: 92vh; overflow-y: auto;
+  }
+  .modal-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fg { margin-bottom: 11px; }
+  .fg label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 4px; }
+  .fg input, .fg select, .fg textarea {
+    width: 100%; padding: 8px 11px; border: 0.5px solid var(--border2);
+    border-radius: var(--radius); font-size: 12px; background: var(--bg);
+    color: var(--text); font-family: inherit;
+  }
+  .fg input:focus, .fg select:focus, .fg textarea:focus { outline: none; border-color: var(--text3); }
+  .fg textarea { min-height: 60px; resize: vertical; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+  /* Loading dots */
+  .ld-dots { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
+  .ld { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); animation: pp 1.2s infinite; }
+  .ld:nth-child(2) { animation-delay: .2s; } .ld:nth-child(3) { animation-delay: .4s; }
+  @keyframes pp { 0%,100% { opacity: .3; } 50% { opacity: 1; } }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 48px 20px; color: var(--text3); font-size: 13px; }
+  .empty strong { display: block; font-size: 16px; color: var(--text2); margin-bottom: 6px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 300;
+    background: var(--text); color: var(--bg); font-size: 12px;
+    padding: 10px 16px; border-radius: var(--radius); opacity: 0;
+    transition: opacity .25s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* Setup banner */
+  .setup-banner {
+    background: #faeeda; border: 0.5px solid #f0c070; border-radius: var(--radius-lg);
+    padding: 13px 16px; margin-bottom: 18px; font-size: 12px; color: #633806;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .setup-banner a { color: #633806; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<div class="topbar">
+  <div class="logo">Portfolio Intel <span id="tb-count">6 companies</span></div>
+  <div class="topbar-right">
+    <button class="back-btn" id="back-btn" onclick="goHome()">← All companies</button>
+    <button class="btn" id="refresh-btn" onclick="refreshSignals()" style="display:none">↻ Refresh signals</button>
+    <button class="btn pri" onclick="openAdd()">+ Add company</button>
+  </div>
+</div>
+
+<!-- ── LIST PAGE ── -->
+<div class="page active" id="page-list">
+  <div id="api-banner" class="setup-banner" style="display:none">
+    ⚠️ Add your Anthropic API key to enable AI features.
+    Get one at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>,
+    then click <strong>Settings</strong> above to add it.
+    &nbsp;<button class="btn" style="font-size:11px;padding:3px 9px" onclick="openSettings()">Add key</button>
+  </div>
+
+  <div class="page-header">
+    <div class="page-title">Your portfolio</div>
+    <div class="page-sub" id="list-sub">Click any company to see signals, hiring alerts, and AI updates</div>
+  </div>
+
+  <div class="filter-row">
+    <div class="chip on" onclick="filterList('all',this)">All</div>
+    <div class="chip" onclick="filterList('active',this)">Active</div>
+    <div class="chip" onclick="filterList('watch',this)">Watch</div>
+    <div class="chip" onclick="filterList('dormant',this)">Dormant</div>
+  </div>
+
+  <div class="co-grid" id="co-grid"></div>
+</div>
+
+<!-- ── DETAIL PAGE ── -->
+<div class="page" id="page-detail">
+
+  <div class="detail-header">
+    <div class="dh-row">
+      <div class="dh-av" id="dh-av"></div>
+      <div class="dh-info">
+        <div class="dh-name" id="dh-name"></div>
+        <div class="dh-meta">
+          <span id="dh-sector"></span>
+          <span style="opacity:.4">·</span>
+          <span id="dh-stage"></span>
+          <span style="opacity:.4">·</span>
+          <a class="dh-link" id="dh-web" href="#" target="_blank"></a>
+          <span style="opacity:.4">·</span>
+          <a class="dh-link" id="dh-li" href="#" target="_blank">LinkedIn ↗</a>
+          <span style="opacity:.4">·</span>
+          <a class="dh-link" id="dh-sw" href="#" target="_blank">SimilarWeb ↗</a>
+        </div>
+      </div>
+      <div class="dh-right">
+        <span class="pill" id="dh-status-badge"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-label">Signal score</div>
+      <div class="stat-val" id="d-score">—</div>
+      <div class="stat-sub" id="d-score-sub"></div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Web traffic</div>
+      <div class="stat-val" id="d-traffic">—</div>
+      <div class="stat-sub">MoM · SimilarWeb</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Open roles</div>
+      <div class="stat-val" id="d-roles">—</div>
+      <div class="stat-sub" id="d-roles-sub"></div>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <div class="card">
+      <div class="card-title">Live signals</div>
+      <div id="d-signals"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Hiring alerts</div>
+      <div class="hire-grid" id="d-hiring"></div>
+    </div>
+  </div>
+
+  <!-- AI CHAT -->
+  <div class="card-title" style="margin-bottom:10px">AI assistant</div>
+  <div class="chat-wrap">
+    <div class="chat-msgs" id="chat-msgs"></div>
+    <div class="chat-sugs">
+      <button class="sug" onclick="ask('What are the latest news and updates?')">Latest news</button>
+      <button class="sug" onclick="ask('Any founder or LinkedIn activity?')">LinkedIn activity</button>
+      <button class="sug" onclick="ask('Summarize the hiring signals')">Hiring signals</button>
+      <button class="sug" onclick="ask('Are there any risks I should watch?')">Risks?</button>
+      <button class="sug" onclick="ask('Give me a short investor brief')">Investor brief</button>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-inp" id="chat-inp" placeholder="Ask about news, founders, hiring, web traffic…" onkeydown="if(event.key==='Enter')sendMsg()"/>
+      <button class="chat-send" onclick="sendMsg()">Send ↗</button>
+    </div>
+  </div>
+
+  <!-- EMAIL ALERTS -->
+  <div class="card-title" style="margin-bottom:10px">Email updates</div>
+  <div class="email-section">
+    <div class="email-row">
+      <input class="email-input" id="email-inp" type="email" placeholder="your@email.com"/>
+      <button class="btn pri" onclick="saveEmail()">Save</button>
+    </div>
+    <div class="toggle-row"><span>Daily digest</span><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-dot"></div></div></div>
+    <div class="toggle-row"><span>Hiring alerts</span><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-dot"></div></div></div>
+    <div class="toggle-row"><span>News mentions</span><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-dot"></div></div></div>
+    <div class="toggle-row"><span>LinkedIn activity</span><div class="tog" onclick="this.classList.toggle('on')"><div class="tog-dot"></div></div></div>
+    <div class="toggle-row"><span>Web traffic changes</span><div class="tog" onclick="this.classList.toggle('on')"><div class="tog-dot"></div></div></div>
+  </div>
+</div>
+
+<!-- ── ADD COMPANY MODAL ── -->
+<div class="modal-bg" id="add-modal" onclick="if(event.target===this)closeAdd()">
+  <div class="modal">
+    <div class="modal-title">Add portfolio company</div>
+    <div class="form-row">
+      <div class="fg"><label>Company name *</label><input id="f-name" placeholder="Acme Inc."/></div>
+      <div class="fg"><label>Sector</label><input id="f-sector" placeholder="Fintech"/></div>
+    </div>
+    <div class="fg"><label>Website URL *</label><input id="f-web" placeholder="https://acme.com"/></div>
+    <div class="fg"><label>LinkedIn company URL</label><input id="f-li" placeholder="https://linkedin.com/company/acme"/></div>
+    <div class="fg"><label>SimilarWeb domain</label><input id="f-sw" placeholder="acme.com"/></div>
+    <div class="form-row">
+      <div class="fg"><label>Stage</label>
+        <select id="f-stage"><option>Seed</option><option>Series A</option><option>Series B</option><option>Series C+</option></select>
+      </div>
+      <div class="fg"><label>Status</label>
+        <select id="f-status"><option value="active">Active</option><option value="watch">Watch</option><option value="dormant">Dormant</option></select>
+      </div>
+    </div>
+    <div class="fg"><label>Short description (optional)</label><textarea id="f-desc" placeholder="What does this company do?"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeAdd()">Cancel</button>
+      <button class="btn pri" onclick="addCompany()">Add company</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SETTINGS MODAL ── -->
+<div class="modal-bg" id="settings-modal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <div class="modal-title">Settings</div>
+    <div class="fg">
+      <label>Anthropic API key</label>
+      <input id="s-apikey" type="password" placeholder="sk-ant-…"/>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">
+        Get your key at <a href="https://console.anthropic.com" target="_blank" style="color:#185fa5">console.anthropic.com</a>.
+        Stored locally in your browser only.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
+      <button class="btn pri" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────
+// CONFIG — replace with your API key OR enter via Settings modal
+// ─────────────────────────────────────────
+const DEFAULT_API_KEY = ''; // paste your key here: 'sk-ant-...'
+
+// ─────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────
+const PALETTES = [
+  {bg:'#e6f1fb',tc:'#0c447c'},{bg:'#e1f5ee',tc:'#085041'},
+  {bg:'#eeedfe',tc:'#3c3489'},{bg:'#faeeda',tc:'#633806'},
+  {bg:'#f1efe8',tc:'#444441'},{bg:'#fbeaf0',tc:'#72243e'},
+];
+
+let companies = [
+  {
+    id:1, name:'Lantern Health', initials:'LH', sector:'HealthTech', stage:'Series B',
+    domain:'lanternhealth.io', li:'linkedin.com/company/lantern-health', sw:'lanternhealth.io',
+    status:'active', traffic:'+31%', roles:9, pal:0,
+    snippet:'Raised $22M Series B. Web traffic +31% MoM. 9 open roles. Partnership with United Healthcare.',
+    score:'9.1', scoreSub:'strongest in portfolio',
+    signals:[
+      {type:'news',  dot:'#378add', label:'News',     title:'Raised $22M Series B — TechCrunch, Forbes, 8 outlets', time:'1h ago',  score:9},
+      {type:'li',    dot:'#1d9e75', label:'LinkedIn', title:'CEO announced Series B close — 2.1k reactions',         time:'6h ago',  score:9},
+      {type:'li',    dot:'#1d9e75', label:'LinkedIn', title:'CTO shared ML infrastructure overhaul post — 88 reactions', time:'5h ago', score:7},
+      {type:'hiring',dot:'#ba7517', label:'Hiring',   title:'4 new clinical roles + ML Engineer on Greenhouse',      time:'8h ago',  score:8},
+      {type:'web',   dot:'#888780', label:'Web',      title:'SimilarWeb +31% MoM — pricing page visits doubled',     time:'2d ago',  score:8},
+      {type:'news',  dot:'#378add', label:'News',     title:'Partnership with United Healthcare announced',           time:'4d ago',  score:8},
+    ],
+    hiring:[
+      {title:'Senior ML Engineer',     dept:'Engineering'},
+      {title:'Data Platform Lead',      dept:'Engineering'},
+      {title:'Head of Growth',          dept:'Marketing'},
+      {title:'Clinical Success Mgr',    dept:'Clinical'},
+      {title:'Backend Engineer (Go)',   dept:'Engineering'},
+      {title:'Product Designer',        dept:'Product'},
+    ],
+    context:'Lantern Health (HealthTech, Series B). Just closed a $22M Series B led by General Catalyst, total raised $35M. CEO Priya Rao announced on LinkedIn (2.1k reactions). CTO James Okafor posted about ML infrastructure overhaul. SimilarWeb traffic +31% MoM, pricing page visits doubled. 9 open roles. Partnership with United Healthcare announced. Strong momentum, no risk flags.'
+  },
+  {
+    id:2, name:'Forma', initials:'FO', sector:'HR Tech', stage:'Series A',
+    domain:'forma.ai', li:'linkedin.com/company/forma', sw:'forma.ai',
+    status:'active', traffic:'+18%', roles:7, pal:1,
+    snippet:'CEO shared AI benefits roadmap on LinkedIn. 7 open roles, enterprise GTM push.',
+    score:'7.1', scoreSub:'solid momentum',
+    signals:[
+      {type:'li',    dot:'#1d9e75', label:'LinkedIn', title:'CEO Alex Chen: AI benefits personalization roadmap — 847 reactions', time:'2h ago',  score:7},
+      {type:'hiring',dot:'#ba7517', label:'Hiring',   title:'Head of Enterprise Sales + 3 AE roles on Greenhouse',               time:'5h ago',  score:8},
+      {type:'web',   dot:'#888780', label:'Web',      title:'Pricing page traffic +24% — enterprise tier most visited',           time:'2d ago',  score:7},
+      {type:'news',  dot:'#378add', label:'News',     title:'HR Tech Weekly: top benefits platform to watch in 2025',            time:'1d ago',  score:6},
+    ],
+    hiring:[
+      {title:'Head of Enterprise Sales', dept:'Sales'},
+      {title:'Account Executive (×3)',   dept:'Sales'},
+      {title:'Senior Frontend Eng',      dept:'Engineering'},
+      {title:'Product Manager',          dept:'Product'},
+    ],
+    context:'Forma (HR Tech, Series A, $18M, Sequoia, NYC). CEO Alex Chen posted AI benefits personalization roadmap on LinkedIn (847 reactions). 7 open roles, mostly enterprise GTM — clear expansion push. SimilarWeb +18% MoM, enterprise pricing page most visited. HR Tech Weekly coverage. CTO Lisa Park quiet 3 days. VP Sales Dan Weiss active.'
+  },
+  {
+    id:3, name:'Silo Finance', initials:'SF', sector:'DeFi', stage:'Seed',
+    domain:'silofinance.com', li:'linkedin.com/company/silo-finance', sw:'silofinance.com',
+    status:'active', traffic:'+9%', roles:6, pal:2,
+    snippet:'v2 launch teased. TVL growing. Featured in The Block. 6 open engineering roles.',
+    score:'6.2', scoreSub:'steady build mode',
+    signals:[
+      {type:'news',  dot:'#378add', label:'News',     title:'The Block DeFi report: Silo TVL growing, v2 launch soon', time:'8h ago',  score:7},
+      {type:'li',    dot:'#1d9e75', label:'LinkedIn', title:'CEO teased v2: better rates, cross-chain, isolated risk',  time:'2d ago',  score:7},
+      {type:'hiring',dot:'#ba7517', label:'Hiring',   title:'Protocol Engineer + Solidity Dev posted',                  time:'1d ago',  score:6},
+      {type:'web',   dot:'#888780', label:'Web',      title:'App traffic +9% MoM, wallet connect page trending',        time:'2d ago',  score:5},
+    ],
+    hiring:[
+      {title:'Protocol Engineer',   dept:'Engineering'},
+      {title:'Solidity Developer',  dept:'Engineering'},
+      {title:'DeFi Researcher',     dept:'Research'},
+      {title:'BD Lead — Protocols', dept:'BD'},
+    ],
+    context:'Silo Finance (DeFi, Seed, $8M, Paradigm, remote). CEO Kai Nakamura teased v2 on LinkedIn: better rates, isolated risk markets, cross-chain support. Featured in The Block DeFi lending report, TVL growing. 6 open roles mostly engineering. Traffic +9% MoM. Watch for v2 launch as potential catalyst.'
+  },
+  {
+    id:4, name:'Cartao', initials:'CA', sector:'Fintech', stage:'Series A',
+    domain:'cartao.com.br', li:'linkedin.com/company/cartao', sw:'cartao.com.br',
+    status:'active', traffic:'+22%', roles:12, pal:3,
+    snippet:'Traffic spike +63% in 7 days. 12 open roles. CEO: processing R$500M/month.',
+    score:'7.8', scoreSub:'investigate traffic spike',
+    signals:[
+      {type:'web',   dot:'#888780', label:'Web',      title:'Traffic spike +63% in 7 days — possible product launch', time:'3h ago',  score:9},
+      {type:'hiring',dot:'#ba7517', label:'Hiring',   title:'6 new eng roles in São Paulo: Go, ML, iOS, Android',    time:'5h ago',  score:8},
+      {type:'li',    dot:'#1d9e75', label:'LinkedIn', title:'CEO: Cartao now processes R$500M/month',                 time:'1d ago',  score:7},
+      {type:'news',  dot:'#378add', label:'News',     title:'Valor Econômico: top fintech to watch in Brazil',        time:'1d ago',  score:7},
+    ],
+    hiring:[
+      {title:'Senior Backend Eng (Go)', dept:'Engineering'},
+      {title:'ML Engineer',             dept:'Engineering'},
+      {title:'iOS Developer',           dept:'Engineering'},
+      {title:'Android Developer',       dept:'Engineering'},
+      {title:'Head of Credit Risk',     dept:'Finance'},
+      {title:'VP Marketing Brazil',     dept:'Marketing'},
+    ],
+    context:'Cartao (Fintech Brazil, Series A, $24M, Tiger Global, São Paulo). 63% traffic spike in 7 days — unexplained, possible stealth product launch. CEO Felipe Costa posted: processing R$500M/month. 12 open roles including 6 engineering hires. Valor Econômico coverage. Recommend reaching out to CEO about traffic spike.'
+  },
+  {
+    id:5, name:'Trellis', initials:'TR', sector:'PropTech', stage:'Seed',
+    domain:'trellis.co', li:'linkedin.com/company/trellis', sw:'trellis.co',
+    status:'watch', traffic:'-3%', roles:0, pal:4,
+    snippet:'No signals in 14 days. Traffic declining for 3 months. Zero open roles.',
+    score:'2.1', scoreSub:'low activity — investigate',
+    signals:[
+      {type:'web',  dot:'#888780', label:'Web',  title:'Traffic -3% MoM for 3rd consecutive month', time:'3d ago', score:3},
+      {type:'news', dot:'#378add', label:'News', title:'No press coverage in 60+ days',              time:'—',      score:1},
+    ],
+    hiring:[],
+    context:'Trellis (PropTech, Seed, $4M, YC, Austin TX). Traffic declining for 3 consecutive months. Zero open roles — possible hiring freeze. No LinkedIn posts from founders in 14 days. No press in 60 days. Score 2.1. Risk: dormancy. Recommend founder check-in call.'
+  },
+  {
+    id:6, name:'Mosaic Labs', initials:'ML', sector:'DeepTech', stage:'Seed',
+    domain:'mosaiclabs.com', li:'linkedin.com/company/mosaic-labs', sw:'mosaiclabs.com',
+    status:'watch', traffic:'+1%', roles:2, pal:5,
+    snippet:'Co-founder departure detected via LinkedIn. Only 2 open roles. Vague CEO comms.',
+    score:'3.4', scoreSub:'risk flag: co-founder left',
+    signals:[
+      {type:'li',    dot:'#e24b4a', label:'LinkedIn', title:'ALERT: Co-founder Dr. Sarah Chen removed company from LinkedIn', time:'2d ago', score:9},
+      {type:'li',    dot:'#1d9e75', label:'LinkedIn', title:'CEO David Wu: "Focusing on core research direction"',            time:'3d ago', score:5},
+      {type:'hiring',dot:'#ba7517', label:'Hiring',   title:'Only 2 open roles — down from 4 last month',                   time:'1d ago', score:4},
+    ],
+    hiring:[
+      {title:'Research Scientist',      dept:'Research'},
+      {title:'ML Infra Engineer',       dept:'Engineering'},
+    ],
+    context:'Mosaic Labs (DeepTech, Seed, $3M, First Round, Boston). HIGH RISK: Co-founder Dr. Sarah Chen removed company from LinkedIn — likely departed. CEO David Wu posted vaguely about "core research direction." Only 2 open roles, down from 4. Traffic flat +1%. Recommend urgent investor call with David Wu.'
+  },
+];
+
+let currentCo = null;
+let chatHistory = [];
+let listFilter = 'all';
+
+function getApiKey() {
+  return localStorage.getItem('pi_apikey') || DEFAULT_API_KEY;
+}
+
+// ─────────────────────────────────────────
+// RENDER LIST
+// ─────────────────────────────────────────
+function renderGrid(filter) {
+  const grid = document.getElementById('co-grid');
+  const list = filter === 'all' ? companies : companies.filter(c => c.status === filter);
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty"><strong>No companies found</strong>Add your first company using the button above.</div>';
+    return;
+  }
+
+  grid.innerHTML = list.map(c => {
+    const pal = PALETTES[c.pal % PALETTES.length];
+    const tClass = c.traffic.startsWith('+') ? 'p-green' : c.traffic === '—' ? 'p-gray' : 'p-red';
+    const sClass = c.status === 'active' ? 'p-green' : c.status === 'watch' ? 'p-amber' : 'p-gray';
+    const newCount = c.signals.filter(s => s.time.includes('h ago') || s.time === '1d ago').length;
+    return `<div class="co-card" onclick="openCo(${c.id})">
+      <div class="co-card-top">
+        <div class="co-av" style="background:${pal.bg};color:${pal.tc}">${c.initials}</div>
+        <div>
+          <div class="co-card-name">${c.name}</div>
+          <div class="co-card-meta">${c.sector} · ${c.stage}</div>
+        </div>
+      </div>
+      <div class="co-pills">
+        <span class="pill ${sClass}">${c.status}</span>
+        <span class="pill ${tClass}">${c.traffic}</span>
+        <span class="pill p-blue">${c.roles} roles</span>
+        ${newCount > 0 ? `<span class="pill p-blue">${newCount} new signals</span>` : ''}
+      </div>
+      <div class="co-snippet">${c.snippet}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterList(f, el) {
+  listFilter = f;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  renderGrid(f);
+}
+
+// ─────────────────────────────────────────
+// OPEN COMPANY DETAIL
+// ─────────────────────────────────────────
+function openCo(id) {
+  currentCo = id;
+  chatHistory = [];
+  const c = companies.find(x => x.id === id);
+  const pal = PALETTES[c.pal % PALETTES.length];
+
+  document.getElementById('page-list').classList.remove('active');
+  document.getElementById('page-detail').classList.add('active');
+  document.getElementById('back-btn').style.display = 'flex';
+  document.getElementById('refresh-btn').style.display = 'inline-flex';
+  document.getElementById('tb-count').textContent = c.name;
+
+  // Header
+  const av = document.getElementById('dh-av');
+  av.textContent = c.initials;
+  av.style.background = pal.bg;
+  av.style.color = pal.tc;
+  document.getElementById('dh-name').textContent = c.name;
+  document.getElementById('dh-sector').textContent = c.sector;
+  document.getElementById('dh-stage').textContent = c.stage;
+  document.getElementById('dh-web').textContent = c.domain;
+  document.getElementById('dh-web').href = 'https://' + c.domain;
+  document.getElementById('dh-li').href = 'https://' + c.li;
+  document.getElementById('dh-sw').href = 'https://www.similarweb.com/website/' + c.sw;
+  const badge = document.getElementById('dh-status-badge');
+  badge.textContent = c.status;
+  badge.className = 'pill ' + (c.status === 'active' ? 'p-green' : c.status === 'watch' ? 'p-amber' : 'p-gray');
+
+  // Stats
+  const scoreEl = document.getElementById('d-score');
+  scoreEl.textContent = c.score;
+  scoreEl.className = 'stat-val ' + (parseFloat(c.score) >= 6 ? 'up' : 'dn');
+  document.getElementById('d-score-sub').textContent = c.scoreSub;
+  const tEl = document.getElementById('d-traffic');
+  tEl.textContent = c.traffic;
+  tEl.className = 'stat-val ' + (c.traffic.startsWith('+') ? 'up' : 'dn');
+  document.getElementById('d-roles').textContent = c.roles;
+  document.getElementById('d-roles-sub').textContent = c.hiring.length ? c.hiring[0].dept + ' and more' : 'no open roles';
+
+  // Signals
+  document.getElementById('d-signals').innerHTML = c.signals.length
+    ? c.signals.map(s => `
+      <div class="sig-item">
+        <div class="sig-dot" style="background:${s.dot}"></div>
+        <div class="sig-body">
+          <div class="sig-title">${s.title}</div>
+          <div class="sig-meta"><span class="pill p-gray" style="font-size:10px">${s.label}</span><span>${s.time}</span></div>
+        </div>
+        <span class="sig-score">${s.score}/10</span>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--text3);padding:8px 0">No signals yet.</div>';
+
+  // Hiring
+  document.getElementById('d-hiring').innerHTML = c.hiring.length
+    ? c.hiring.map(h => `
+      <div class="hire-item">
+        <div class="hire-title">${h.title}</div>
+        <div class="hire-dept">${h.dept}</div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--text3);padding:8px 0;grid-column:1/-1">No open roles found.</div>';
+
+  // Chat
+  const msgs = document.getElementById('chat-msgs');
+  msgs.innerHTML = '';
+  addBubble('ai', `I'm tracking <strong>${c.name}</strong>. ${c.snippet} What would you like to know?`);
+
+  // Scroll to top
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  document.getElementById('page-detail').classList.remove('active');
+  document.getElementById('page-list').classList.add('active');
+  document.getElementById('back-btn').style.display = 'none';
+  document.getElementById('refresh-btn').style.display = 'none';
+  document.getElementById('tb-count').textContent = companies.length + ' companies';
+  renderGrid(listFilter);
+}
+
+// ─────────────────────────────────────────
+// CHAT
+// ─────────────────────────────────────────
+function addBubble(role, html) {
+  const msgs = document.getElementById('chat-msgs');
+  const d = document.createElement('div');
+  d.className = 'msg ' + (role === 'user' ? 'u' : '');
+  d.innerHTML = role === 'ai'
+    ? `<div class="m-av ai-av">AI</div><div class="bubble">${html}</div>`
+    : `<div class="bubble">${html}</div><div class="m-av u-av">You</div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addLoading() {
+  const msgs = document.getElementById('chat-msgs');
+  const d = document.createElement('div');
+  d.className = 'msg'; d.id = 'ld-msg';
+  d.innerHTML = `<div class="m-av ai-av">AI</div><div class="bubble"><div class="ld-dots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div></div>`;
+  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function ask(q) {
+  document.getElementById('chat-inp').value = q;
+  await sendMsg();
+}
+
+async function sendMsg() {
+  const inp = document.getElementById('chat-inp');
+  const q = inp.value.trim();
+  if (!q || !currentCo) return;
+  inp.value = '';
+
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    addBubble('ai', 'Please add your Anthropic API key in Settings to use the AI assistant.');
+    return;
+  }
+
+  addBubble('user', q);
+  chatHistory.push({ role: 'user', content: q });
+  addLoading();
+
+  const c = companies.find(x => x.id === currentCo);
+  const system = `You are an AI investment analyst assistant for a VC fund. You have live intelligence on ${c.name}.
+
+Company data:
+${c.context}
+
+Live signals (${c.signals.length}):
+${c.signals.map(s => `- ${s.label}: ${s.title} (${s.time}, relevance ${s.score}/10)`).join('\n')}
+
+Open roles (${c.roles}): ${c.hiring.map(h => h.title + ' [' + h.dept + ']').join(', ') || 'none'}
+Web traffic MoM: ${c.traffic} | Status: ${c.status} | Signal score: ${c.score}/10
+
+Answer the investor's question in 2–4 sentences. Be direct and analytical. Flag risks clearly. No markdown symbols or bullet points.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, system, messages: chatHistory })
+    });
+    const data = await res.json();
+    document.getElementById('ld-msg')?.remove();
+    if (data.error) { addBubble('ai', 'API error: ' + data.error.message); return; }
+    const reply = data.content?.[0]?.text || 'No response.';
+    chatHistory.push({ role: 'assistant', content: reply });
+    addBubble('ai', reply.replace(/\n/g, '<br>'));
+  } catch (e) {
+    document.getElementById('ld-msg')?.remove();
+    addBubble('ai', 'Connection error. Check your API key and try again.');
+  }
+}
+
+// ─────────────────────────────────────────
+// ADD COMPANY
+// ─────────────────────────────────────────
+function openAdd() { document.getElementById('add-modal').classList.add('open'); }
+function closeAdd() { document.getElementById('add-modal').classList.remove('open'); }
+
+function addCompany() {
+  const name = document.getElementById('f-name').value.trim();
+  const web  = document.getElementById('f-web').value.trim();
+  if (!name || !web) { showToast('Name and website are required'); return; }
+
+  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const domain   = web.replace(/https?:\/\//, '').replace(/\/$/, '');
+  const li       = document.getElementById('f-li').value.replace(/https?:\/\//, '') || 'linkedin.com/company/' + name.toLowerCase().replace(/\s+/g, '-');
+  const sw       = document.getElementById('f-sw').value || domain;
+  const stage    = document.getElementById('f-stage').value;
+  const status   = document.getElementById('f-status').value;
+  const sector   = document.getElementById('f-sector').value || '—';
+  const desc     = document.getElementById('f-desc').value || `${name} — tracking started.`;
+  const newId    = Math.max(...companies.map(c => c.id)) + 1;
+
+  companies.push({
+    id: newId, name, initials, sector, stage, domain, li, sw,
+    status, traffic: '—', roles: 0, pal: (companies.length % PALETTES.length),
+    snippet: desc, score: '—', scoreSub: 'signals loading',
+    signals: [], hiring: [],
+    context: `${name} (${sector}, ${stage}). Website: ${domain}. LinkedIn: ${li}. SimilarWeb: ${sw}. Recently added — signals will populate as tracking begins. Description: ${desc}`
+  });
+
+  document.getElementById('tb-count').textContent = companies.length + ' companies';
+  closeAdd();
+  ['f-name','f-sector','f-web','f-li','f-sw','f-desc'].forEach(id => document.getElementById(id).value = '');
+  renderGrid(listFilter);
+  showToast(name + ' added successfully');
+}
+
+// ─────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────
+function openSettings() { document.getElementById('settings-modal').classList.add('open'); document.getElementById('s-apikey').value = getApiKey(); }
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+function saveSettings() {
+  const key = document.getElementById('s-apikey').value.trim();
+  localStorage.setItem('pi_apikey', key);
+  closeSettings();
+  checkApiKey();
+  showToast('API key saved');
+}
+
+function checkApiKey() {
+  const hasKey = !!getApiKey();
+  document.getElementById('api-banner').style.display = hasKey ? 'none' : 'flex';
+}
+
+// ─────────────────────────────────────────
+// REFRESH SIGNALS (simulated)
+// ─────────────────────────────────────────
+function refreshSignals() {
+  const btn = document.getElementById('refresh-btn');
+  btn.textContent = '↻ Refreshing…';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '↻ Refresh signals';
+    btn.disabled = false;
+    showToast('Signals refreshed');
+  }, 1800);
+}
+
+// ─────────────────────────────────────────
+// EMAIL SAVE
+// ─────────────────────────────────────────
+function saveEmail() {
+  const v = document.getElementById('email-inp').value.trim();
+  if (!v || !v.includes('@')) { showToast('Enter a valid email address'); return; }
+  localStorage.setItem('pi_email_' + currentCo, v);
+  showToast('Email saved — updates will be sent to ' + v);
+}
+
+// ─────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ─────────────────────────────────────────
+// ADD SETTINGS BUTTON
+// ─────────────────────────────────────────
+const settingsBtn = document.createElement('button');
+settingsBtn.className = 'btn';
+settingsBtn.textContent = 'Settings';
+settingsBtn.onclick = openSettings;
+document.querySelector('.topbar-right').insertBefore(settingsBtn, document.getElementById('back-btn').nextSibling);
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+checkApiKey();
+renderGrid('all');
+</script>
+</body>
+</html>
