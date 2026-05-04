@@ -1,0 +1,2048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>e2vc Intel</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;
+  --bg2:#f7f7f5;
+  --bg3:#f0efeb;
+  --text:#1a1918;
+  --text2:#6b6a66;
+  --text3:#a0a09a;
+  --border:rgba(0,0,0,0.08);
+  --border2:rgba(0,0,0,0.15);
+  --accent:#1a1918;
+  --radius:6px;
+  --radius-lg:10px;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;gap:14px;padding:0 28px;height:52px;border-bottom:0.5px solid var(--border);position:sticky;top:0;z-index:200;background:rgba(255,255,255,.95);backdrop-filter:blur(12px)}
+.logo{font-size:13px;font-weight:700;letter-spacing:.05em;color:var(--text);text-transform:uppercase}
+.logo-sep{color:var(--text3);margin:0 2px}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tbtn{font-size:11px;padding:5px 12px;border-radius:var(--radius);border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;letter-spacing:.02em}
+.tbtn:hover{background:var(--bg3);color:var(--text)}
+.tbtn.pri{background:var(--text);color:var(--bg);border-color:transparent;font-weight:600}
+.tbtn.pri:hover{opacity:.88}
+.back-btn{display:none;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer;padding:5px 12px;border-radius:var(--radius);border:0.5px solid var(--border2);letter-spacing:.02em}
+.back-btn:hover{background:var(--bg3);color:var(--text)}
+
+/* ── PAGES ── */
+.page{display:none;max-width:1100px;margin:0 auto;padding:32px 28px}
+.page.active{display:block}
+
+/* ── QUICK STATS ── */
+.qs-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:32px}
+.qs{background:var(--bg2);padding:16px 18px}
+.qs-val{font-size:26px;font-weight:700;color:var(--text);letter-spacing:-.03em;line-height:1}
+.qs-label{font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+.qs-sub{font-size:10px;color:var(--text3);margin-top:3px}
+.qs-val.up{color:#5dba8a}
+
+/* ── FILTERS ── */
+.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.list-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.filter-row{display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-size:11px;padding:4px 11px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;letter-spacing:.02em;transition:all .15s}
+.chip:hover{background:var(--bg3);color:var(--text)}
+.chip.on{background:var(--text);color:var(--bg);border-color:transparent;font-weight:600}
+
+/* ── COMPANY GRID ── */
+.co-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:var(--border);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-top:14px}
+.co-card{background:var(--bg2);padding:0;cursor:pointer;transition:background .15s;display:flex;flex-direction:column;position:relative}
+.co-card:hover{background:var(--bg3)}
+.co-card:hover .co-card-arrow{opacity:1}
+.co-card-body{padding:16px 18px 14px;flex:1;display:flex;flex-direction:column}
+.co-av{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-bottom:12px;letter-spacing:.02em}
+.co-card-name{font-size:15px;font-weight:600;color:var(--text);letter-spacing:-.02em;margin-bottom:3px;line-height:1.2}
+.co-card-meta{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.co-snippet{font-size:11px;color:var(--text2);line-height:1.55;flex:1}
+.co-card-footer{padding:10px 18px 14px;display:flex;align-items:center;gap:6px;border-top:0.5px solid var(--border)}
+.co-pill{font-size:9px;padding:2px 7px;border-radius:6px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.co-pill-fund{background:rgba(255,255,255,.07);color:var(--text2)}
+.co-pill-stage{background:rgba(255,255,255,.05);color:var(--text3)}
+.co-card-arrow{position:absolute;top:16px;right:16px;font-size:12px;color:var(--text3);opacity:0;transition:opacity .15s}
+.co-card-actions{position:absolute;top:12px;right:12px;display:flex;gap:2px;align-items:center;z-index:10}
+.star-btn{background:none;border:none;cursor:pointer;padding:4px;font-size:14px;line-height:1;border-radius:4px;opacity:.5;transition:opacity .15s}
+.star-btn:hover,.star-btn.on{opacity:1}
+.del-btn{background:none;border:none;cursor:pointer;padding:4px 5px;font-size:12px;line-height:1;border-radius:4px;color:var(--text3);opacity:0;transition:opacity .15s}
+.co-card:hover .del-btn{opacity:.6}
+.del-btn:hover{opacity:1!important;color:#e05555}
+.co-card.starred{box-shadow:inset 0 0 0 1px rgba(240,192,64,.35)}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3);font-size:13px;grid-column:1/-1}
+
+/* ── SETUP BANNER ── */
+.setup-banner{background:rgba(240,160,30,.08);border:0.5px solid rgba(240,160,30,.25);border-radius:var(--radius-lg);padding:12px 16px;margin-bottom:20px;font-size:12px;color:#e0a830;display:flex;align-items:center;gap:10px}
+.setup-banner a{color:#e0a830;font-weight:600}
+
+/* ── DETAIL PAGE ── */
+.detail-header{margin-bottom:24px}
+.dh-row{display:flex;align-items:flex-start;gap:14px}
+.dh-av{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.dh-info{flex:1}
+.dh-name{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.04em;margin-bottom:6px}
+.dh-meta{font-size:11px;color:var(--text2);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dh-link{color:var(--text2);text-decoration:none;font-size:11px;border-bottom:0.5px solid var(--text3)}
+.dh-link:hover{color:var(--text);border-color:var(--text)}
+.dh-sep{color:var(--text3)}
+
+/* ── STATS BAR ── */
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:20px}
+.stat{background:var(--bg2);padding:14px 16px}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.stat-val{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.03em}
+.stat-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.up{color:#5dba8a}.dn{color:#e05555}
+
+/* ── SIGNAL TABS ── */
+.signal-section{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px}
+.sig-tabs{display:flex;border-bottom:0.5px solid var(--border);overflow-x:auto}
+.sig-tab{font-size:11px;padding:11px 16px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;letter-spacing:.02em;display:flex;align-items:center;gap:6px}
+.sig-tab:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.sig-tab.active{color:var(--text);font-weight:600;border-bottom-color:var(--text)}
+.tab-count{font-size:9px;background:rgba(255,255,255,.1);color:var(--text2);padding:1px 5px;border-radius:6px}
+.sig-tab.active .tab-count{background:var(--text);color:var(--bg)}
+.sig-panel{display:none;padding:4px 0}
+.sig-panel.active{display:block}
+.sig-item{display:flex;gap:10px;padding:11px 18px;border-bottom:0.5px solid var(--border);align-items:flex-start}
+.sig-item:last-child{border-bottom:none}
+.sig-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.sig-body{flex:1}
+.sig-title{font-size:12px;color:var(--text);line-height:1.45;margin-bottom:3px}
+.sig-meta{font-size:10px;color:var(--text3)}
+.sig-score{font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px;background:rgba(255,255,255,.07);color:var(--text2);flex-shrink:0}
+.sig-empty{font-size:12px;color:var(--text3);padding:24px 18px;text-align:center}
+
+/* ── HIRING GRID ── */
+.hire-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.hire-item{background:var(--bg2);padding:11px 14px}
+.hire-title{font-size:12px;font-weight:500;color:var(--text)}
+.hire-dept{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.04em}
+
+/* ── AI CHAT ── */
+.section-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.chat-wrap{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px}
+.chat-msgs{padding:16px;display:flex;flex-direction:column;gap:10px;min-height:160px;max-height:340px;overflow-y:auto}
+.msg{display:flex;gap:8px;align-items:flex-start}
+.msg.u{flex-direction:row-reverse}
+.m-av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.ai-av{background:rgba(255,255,255,.1);color:var(--text)}
+.u-av{background:rgba(93,186,138,.2);color:#5dba8a}
+.bubble{max-width:84%;padding:9px 13px;border-radius:var(--radius-lg);font-size:12px;line-height:1.6;color:var(--text);border:0.5px solid var(--border)}
+.msg.u .bubble{background:rgba(255,255,255,.05);border-color:transparent}
+.chat-sugs{display:flex;gap:5px;flex-wrap:wrap;padding:0 16px 12px}
+.sug{font-size:11px;padding:4px 10px;border-radius:14px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}
+.sug:hover{background:var(--bg3);color:var(--text)}
+.chat-input-row{border-top:0.5px solid var(--border);display:flex}
+.chat-inp{flex:1;padding:11px 14px;border:none;background:transparent;font-size:12px;color:var(--text);font-family:inherit}
+.chat-inp:focus{outline:none}
+.chat-inp::placeholder{color:var(--text3)}
+.chat-send{padding:11px 16px;border:none;border-left:0.5px solid var(--border);background:transparent;font-size:11px;color:var(--text2);cursor:pointer;letter-spacing:.02em}
+.chat-send:hover{background:rgba(255,255,255,.05);color:var(--text)}
+
+/* ── EMAIL ── */
+.email-section{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px}
+.email-row{display:flex;gap:8px;margin-bottom:14px}
+.email-input{flex:1;padding:8px 11px;border:0.5px solid var(--border2);border-radius:var(--radius);font-size:12px;background:var(--bg);color:var(--text);font-family:inherit}
+.email-input:focus{outline:none;border-color:var(--text3)}
+.email-input::placeholder{color:var(--text3)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:12px;color:var(--text2)}
+.toggle-row:last-child{border-bottom:none}
+.tog{width:32px;height:18px;border-radius:9px;background:var(--border2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tog.on{background:#5dba8a}
+.tog-dot{width:12px;height:12px;border-radius:50%;background:white;position:absolute;top:3px;left:3px;transition:left .2s}
+.tog.on .tog-dot{left:17px}
+
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border-radius:var(--radius-lg);border:0.5px solid var(--border2);padding:24px;width:460px;max-width:94vw;max-height:92vh;overflow-y:auto}
+.modal-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;letter-spacing:-.02em}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg{margin-bottom:11px}
+.fg label{font-size:10px;color:var(--text3);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 11px;border:0.5px solid var(--border2);border-radius:var(--radius);font-size:12px;background:var(--bg);color:var(--text);font-family:inherit}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--text3)}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--text3)}
+.fg textarea{min-height:60px;resize:vertical}
+.fg select option{background:var(--bg2)}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+/* ── LOADING ── */
+.ld-dots{display:flex;gap:4px;align-items:center}
+.ld{width:4px;height:4px;border-radius:50%;background:var(--text3);animation:pp 1.2s infinite}
+.ld:nth-child(2){animation-delay:.2s}.ld:nth-child(3){animation-delay:.4s}
+@keyframes pp{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;z-index:400;background:var(--text);color:var(--bg);font-size:11px;font-weight:600;padding:10px 16px;border-radius:var(--radius);opacity:0;transition:opacity .25s;pointer-events:none;letter-spacing:.02em}
+.toast.show{opacity:1}
+
+@media(max-width:640px){
+  .qs-bar{grid-template-columns:repeat(3,1fr)}
+  .co-grid{grid-template-columns:1fr 1fr}
+  .page{padding:20px 16px}
+  .topbar{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">e2vc<span class="logo-sep"> / </span>Intel</div>
+  <div class="topbar-right">
+    <button class="back-btn" id="back-btn" onclick="goHome()">← Portfolio</button>
+    <button class="tbtn" id="refresh-btn" onclick="refreshSignals()" style="display:none">↻ Refresh</button>
+    <button class="tbtn" id="settings-btn" onclick="openSettings()">Settings</button>
+    <button class="tbtn pri" onclick="openAdd()">+ Add</button>
+  </div>
+</div>
+
+<!-- LIST PAGE -->
+<div class="page active" id="page-list">
+
+  <div id="api-banner" class="setup-banner" style="display:none">
+    ⚠️ Add your Anthropic API key to enable AI features —
+    <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+    &nbsp;<button class="tbtn" style="font-size:10px;padding:3px 8px" onclick="openSettings()">Add key</button>
+  </div>
+
+  <div class="qs-bar">
+    <div class="qs"><div class="qs-val" id="qs-total">68</div><div class="qs-label">Companies</div><div class="qs-sub" id="qs-funds">F1 · F2 · F3</div></div>
+    <div class="qs"><div class="qs-val up" id="qs-starred">0</div><div class="qs-label">Starred</div><div class="qs-sub">highlighted</div></div>
+    <div class="qs"><div class="qs-val" id="qs-signals">0</div><div class="qs-label">Signals</div><div class="qs-sub">across portfolio</div></div>
+    <div class="qs"><div class="qs-val up" id="qs-hiring">0</div><div class="qs-label">Open roles</div><div class="qs-sub" id="qs-hiring-sub">—</div></div>
+    <div class="qs"><div class="qs-val" id="qs-active">0</div><div class="qs-label">With signals</div><div class="qs-sub">have activity</div></div>
+  </div>
+
+  <div class="list-header">
+    <div class="list-title">Portfolio</div>
+    <div class="filter-row">
+      <div class="chip on" onclick="filterList('all',this)">All</div>
+      <div class="chip" onclick="filterList('Fund I',this)">Fund I</div>
+      <div class="chip" onclick="filterList('Fund II',this)">Fund II</div>
+      <div class="chip" onclick="filterList('Fund III',this)">Fund III</div>
+      <div class="chip" onclick="filterList('starred',this)">⭐ Starred</div>
+    </div>
+  </div>
+
+  <div class="co-grid" id="co-grid"></div>
+</div>
+
+<!-- DETAIL PAGE -->
+<div class="page" id="page-detail">
+
+  <div class="detail-header">
+    <div class="dh-row">
+      <div class="dh-av" id="dh-av"></div>
+      <div class="dh-info">
+        <div class="dh-name" id="dh-name"></div>
+        <div class="dh-meta">
+          <span id="dh-sector"></span>
+          <span class="dh-sep">·</span>
+          <span id="dh-stage"></span>
+          <span class="dh-sep">·</span>
+          <a class="dh-link" id="dh-web" href="#" target="_blank"></a>
+          <span class="dh-sep">·</span>
+          <a class="dh-link" id="dh-li" href="#" target="_blank">LinkedIn ↗</a>
+          <span class="dh-sep">·</span>
+          <a class="dh-link" id="dh-sw" href="#" target="_blank">SimilarWeb ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-label">Signal score</div><div class="stat-val" id="d-score">—</div><div class="stat-sub" id="d-score-sub"></div></div>
+    <div class="stat"><div class="stat-label">Web traffic</div><div class="stat-val" id="d-traffic">—</div><div class="stat-sub">MoM · SimilarWeb</div></div>
+    <div class="stat"><div class="stat-label">Open roles</div><div class="stat-val" id="d-roles">—</div><div class="stat-sub" id="d-roles-sub"></div></div>
+  </div>
+
+  <div class="signal-section">
+    <div class="sig-tabs">
+      <div class="sig-tab active" onclick="switchSigTab('news',this)">🌐 News <span class="tab-count" id="tc-news">0</span></div>
+      <div class="sig-tab" onclick="switchSigTab('company',this)">🏢 Company LinkedIn <span class="tab-count" id="tc-company">0</span></div>
+      <div class="sig-tab" onclick="switchSigTab('founder',this)">👤 Founder LinkedIn <span class="tab-count" id="tc-founder">0</span></div>
+      <div class="sig-tab" onclick="switchSigTab('hiring',this)">💼 Hiring <span class="tab-count" id="tc-hiring">0</span></div>
+    </div>
+    <div class="sig-panel active" id="sp-news"></div>
+    <div class="sig-panel" id="sp-company"></div>
+    <div class="sig-panel" id="sp-founder"></div>
+    <div class="sig-panel" id="sp-hiring"></div>
+  </div>
+
+  <div class="section-label">AI assistant</div>
+  <div class="chat-wrap">
+    <div class="chat-msgs" id="chat-msgs"></div>
+    <div class="chat-sugs">
+      <button class="sug" onclick="ask('What are the latest news and updates?')">Latest news</button>
+      <button class="sug" onclick="ask('Any founder or LinkedIn activity?')">LinkedIn activity</button>
+      <button class="sug" onclick="ask('Summarize the hiring signals')">Hiring signals</button>
+      <button class="sug" onclick="ask('Are there any risks I should watch?')">Risks?</button>
+      <button class="sug" onclick="ask('Give me a short investor brief')">Investor brief</button>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-inp" id="chat-inp" placeholder="Ask about news, founders, hiring, web traffic…" onkeydown="if(event.key==='Enter')sendMsg()"/>
+      <button class="chat-send" onclick="sendMsg()">Send ↗</button>
+    </div>
+  </div>
+
+  <div class="section-label">Email updates</div>
+  <div class="email-section">
+    <div class="email-row">
+      <input class="email-input" id="email-inp" type="email" placeholder="your@email.com"/>
+      <button class="tbtn pri" onclick="saveEmail()">Save</button>
+    </div>
+    <div class="toggle-row"><span>Daily digest</span><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-dot"></div></div></div>
+    <div class="toggle-row"><span>Hiring alerts</span><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-dot"></div></div></div>
+    <div class="toggle-row"><span>News mentions</span><div class="tog on" onclick="this.classList.toggle('on')"><div class="tog-dot"></div></div></div>
+    <div class="toggle-row"><span>LinkedIn activity</span><div class="tog" onclick="this.classList.toggle('on')"><div class="tog-dot"></div></div></div>
+    <div class="toggle-row"><span>Web traffic changes</span><div class="tog" onclick="this.classList.toggle('on')"><div class="tog-dot"></div></div></div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-bg" id="add-modal" onclick="if(event.target===this)closeAdd()">
+  <div class="modal">
+    <div class="modal-title">Add company</div>
+    <div class="form-row">
+      <div class="fg"><label>Company name *</label><input id="f-name" placeholder="Acme Inc."/></div>
+      <div class="fg"><label>Sector</label><input id="f-sector" placeholder="Fintech"/></div>
+    </div>
+    <div class="fg"><label>Website URL *</label><input id="f-web" placeholder="https://acme.com"/></div>
+    <div class="fg"><label>LinkedIn URL</label><input id="f-li" placeholder="https://linkedin.com/company/acme"/></div>
+    <div class="fg"><label>SimilarWeb domain</label><input id="f-sw" placeholder="acme.com"/></div>
+    <div class="form-row">
+      <div class="fg"><label>Stage</label><select id="f-stage"><option>Seed</option><option>Series A</option><option>Series B</option><option>Series C+</option></select></div>
+      <div class="fg"><label>Fund</label><select id="f-fund"><option>Fund I</option><option>Fund II</option><option>Fund III</option></select></div>
+    </div>
+    <div class="fg"><label>Description</label><textarea id="f-desc" placeholder="What does this company do?"></textarea></div>
+    <div class="modal-footer">
+      <button class="tbtn" onclick="closeAdd()">Cancel</button>
+      <button class="tbtn pri" onclick="addCompany()">Add company</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settings-modal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <div class="modal-title">Settings</div>
+    <div class="fg">
+      <label>Anthropic API key</label>
+      <input id="s-apikey" type="password" placeholder="sk-ant-…"/>
+      <div style="font-size:10px;color:var(--text3);margin-top:5px">Get your key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--text2)">console.anthropic.com</a>. Stored in your browser only.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="tbtn" onclick="closeSettings()">Cancel</button>
+      <button class="tbtn pri" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PALETTES=[
+  {bg:'#1a2a3a',tc:'#7ab3d4'},{bg:'#1a2e24',tc:'#6dba8a'},
+  {bg:'#2a1e38',tc:'#a888d4'},{bg:'#2e2218',tc:'#c49a5a'},
+  {bg:'#1e1e1e',tc:'#888880'},{bg:'#2e1a22',tc:'#c47890'},
+];
+
+let companies = [
+  {
+    "id": 1,
+    "name": "3DLook",
+    "initials": "3D",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "3dlook.ai",
+    "li": "www.linkedin.com/company/3dlook/about",
+    "sw": "3dlook.ai",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "3DLOOK turns two smartphone photos into precise human geometry so health progress can be measured over time, wearables p…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "3DLook (Fund I, Series A). Website: 3dlook.ai. LinkedIn: www.linkedin.com/company/3dlook/about. 3DLOOK turns two smartphone photos into precise human geometry so health progress can be measured over time, wearables perform more accurately, and apparel fits by design."
+  },
+  {
+    "id": 2,
+    "name": "AppSamurai",
+    "initials": "AP",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "appsamurai.com",
+    "li": "www.linkedin.com/company/apsamurai",
+    "sw": "appsamurai.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "AppSamurai is the performance-first AdTech platform purpose-built for sustainable mobile app growth.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "AppSamurai (Fund I, Series A). Website: appsamurai.com. LinkedIn: www.linkedin.com/company/apsamurai. AppSamurai is the performance-first AdTech platform purpose-built for sustainable mobile app growth."
+  },
+  {
+    "id": 3,
+    "name": "Avatao",
+    "initials": "AV",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "avatao.com/contact",
+    "li": "www.linkedin.com/company/avatao/posts/?feedView=all",
+    "sw": "avatao.com/contact",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "Avatao offers practical, hands-on security training for developers and non-tech staff. From phishing awareness to secure…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Avatao (Fund I, Series A). Website: avatao.com/contact. LinkedIn: www.linkedin.com/company/avatao/posts/?feedView=all. Avatao offers practical, hands-on security training for developers and non-tech staff. From phishing awareness to secure coding aligned with ISO 27001, PCI-DSS, SOC 2, and more — we help SMBs strengthen their security posture with ease."
+  },
+  {
+    "id": 4,
+    "name": "BillionToOne",
+    "initials": "BI",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "www.billiontoone.com",
+    "li": "www.linkedin.com/company/billiontoone/posts/?feedView=all",
+    "sw": "www.billiontoone.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "BillionToOne is a precision diagnostics company with the mission to make molecular diagnostics more accurate, efficient,…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "BillionToOne (Fund I, Series A). Website: www.billiontoone.com. LinkedIn: www.linkedin.com/company/billiontoone/posts/?feedView=all. BillionToOne is a precision diagnostics company with the mission to make molecular diagnostics more accurate, efficient, and accessible."
+  },
+  {
+    "id": 5,
+    "name": "buybuddy",
+    "initials": "BU",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "www.buybuddy.co",
+    "li": "www.linkedin.com/company/buy-buddy",
+    "sw": "www.buybuddy.co",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "Buy Buddy is a revolutionary IoT solution transforming the retail industry.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "buybuddy (Fund I, Series A). Website: www.buybuddy.co. LinkedIn: www.linkedin.com/company/buy-buddy. Buy Buddy is a revolutionary IoT solution transforming the retail industry."
+  },
+  {
+    "id": 6,
+    "name": "Carbon Health",
+    "initials": "CH",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "carbonhealth.com",
+    "li": "www.linkedin.com/company/carbon-health",
+    "sw": "carbonhealth.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "Carbon Health is a health technology company and modern healthcare provider that simplifies access to care through its E…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Carbon Health (Fund I, Series A). Website: carbonhealth.com. LinkedIn: www.linkedin.com/company/carbon-health. Carbon Health is a health technology company and modern healthcare provider that simplifies access to care through its EHR platform, locations with urgent and primary services, and patient app for easier everyday health."
+  },
+  {
+    "id": 7,
+    "name": "DroneDeploy",
+    "initials": "DR",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "www.dronedeploy.com",
+    "li": "www.linkedin.com/company/dronedeploy/posts/?feedView=all",
+    "sw": "www.dronedeploy.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "DroneDeploy allows critical industries to operate with speed and confidence",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "DroneDeploy (Fund I, Series A). Website: www.dronedeploy.com. LinkedIn: www.linkedin.com/company/dronedeploy/posts/?feedView=all. DroneDeploy allows critical industries to operate with speed and confidence"
+  },
+  {
+    "id": 8,
+    "name": "evreka",
+    "initials": "EV",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "evreka.co",
+    "li": "www.linkedin.com/company/evreka",
+    "sw": "evreka.co",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "Evreka designs digitized and end-to-end waste management solutions",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "evreka (Fund I, Series A). Website: evreka.co. LinkedIn: www.linkedin.com/company/evreka. Evreka designs digitized and end-to-end waste management solutions"
+  },
+  {
+    "id": 9,
+    "name": "Fazla",
+    "initials": "FA",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "fazla.com",
+    "li": "www.linkedin.com/company/fazlagida",
+    "sw": "fazla.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "Fazla prevent waste generation at its source and recycle the waste into the circular economy",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Fazla (Fund I, Series A). Website: fazla.com. LinkedIn: www.linkedin.com/company/fazlagida. Fazla prevent waste generation at its source and recycle the waste into the circular economy"
+  },
+  {
+    "id": 10,
+    "name": "FineDine",
+    "initials": "FI",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "www.finedinemenu.com/tr",
+    "li": "www.linkedin.com/company/finedine-digital-menu",
+    "sw": "www.finedinemenu.com/tr",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "As a pioneer in restaurant technology, FineDine is dedicated to simplifying the path to profitable expansion for restaur…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "FineDine (Fund I, Series A). Website: www.finedinemenu.com/tr. LinkedIn: www.linkedin.com/company/finedine-digital-menu. As a pioneer in restaurant technology, FineDine is dedicated to simplifying the path to profitable expansion for restaurants everywhere."
+  },
+  {
+    "id": 11,
+    "name": "Firefly",
+    "initials": "FI",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "www.fireflyon.com",
+    "li": "www.linkedin.com/company/fireflyon",
+    "sw": "www.fireflyon.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "Firefly pioneered car-top advertising, transforming urban landscapes with the world’s most advanced moving digital scree…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Firefly (Fund I, Series A). Website: www.fireflyon.com. LinkedIn: www.linkedin.com/company/fireflyon. Firefly pioneered car-top advertising, transforming urban landscapes with the world’s most advanced moving digital screens."
+  },
+  {
+    "id": 12,
+    "name": "Insider One",
+    "initials": "IO",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "insiderone.com",
+    "li": "www.linkedin.com/company/insiderone",
+    "sw": "insiderone.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "Insider One is the #1 platform that brings everything marketing and customer engagement teams need in one place so they …",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Insider One (Fund I, Series A). Website: insiderone.com. LinkedIn: www.linkedin.com/company/insiderone. Insider One is the #1 platform that brings everything marketing and customer engagement teams need in one place so they can reach their peak potential and become unstoppable."
+  },
+  {
+    "id": 13,
+    "name": "Kolay İK",
+    "initials": "Kİ",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "kolayik.com",
+    "li": "www.linkedin.com/company/kolayik/posts/?feedView=all",
+    "sw": "kolayik.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "Türkiye'nin ilk bulut tabanlı insan kaynakları ve personel yönetim yazılımı.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Kolay İK (Fund I, Series A). Website: kolayik.com. LinkedIn: www.linkedin.com/company/kolayik/posts/?feedView=all. Türkiye'nin ilk bulut tabanlı insan kaynakları ve personel yönetim yazılımı."
+  },
+  {
+    "id": 14,
+    "name": "Kondukto (acquired by Invicti)",
+    "initials": "K(",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "www.invicti.com",
+    "li": "www.linkedin.com/company/kondukto",
+    "sw": "www.invicti.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "Kondukto is an AppSec orchestration and posture management platform that helps AppSec teams achieve instant visibility i…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Kondukto (acquired by Invicti) (Fund I, Series A). Website: www.invicti.com. LinkedIn: www.linkedin.com/company/kondukto. Kondukto is an AppSec orchestration and posture management platform that helps AppSec teams achieve instant visibility into the overall security posture by integrating all security data into one crystal clear view."
+  },
+  {
+    "id": 15,
+    "name": "Lifemote",
+    "initials": "LI",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "www.lifemote.com",
+    "li": "www.linkedin.com/company/lifemote-networks/posts/?feedView=all",
+    "sw": "www.lifemote.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "Lifemote is an AI-powered SaaS platform for Internet Service Providers (ISPs), enabling full visibility and control of t…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Lifemote (Fund I, Series A). Website: www.lifemote.com. LinkedIn: www.linkedin.com/company/lifemote-networks/posts/?feedView=all. Lifemote is an AI-powered SaaS platform for Internet Service Providers (ISPs), enabling full visibility and control of the in-home Wi-Fi experience."
+  },
+  {
+    "id": 16,
+    "name": "Mall IQ",
+    "initials": "MI",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "www.malliq.com",
+    "li": "www.linkedin.com/company/mall-iq-inc/posts/?feedView=all",
+    "sw": "www.malliq.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "Mall IQ, Inc. is a San Francisco based company offering the most scalable Location Intelligence & AI Platform for mobile…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Mall IQ (Fund I, Series A). Website: www.malliq.com. LinkedIn: www.linkedin.com/company/mall-iq-inc/posts/?feedView=all. Mall IQ, Inc. is a San Francisco based company offering the most scalable Location Intelligence & AI Platform for mobile apps that is store level accurate indoors & outdoors w/o any hardware deployments."
+  },
+  {
+    "id": 17,
+    "name": "Massive Bio",
+    "initials": "MB",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "massivebio.com",
+    "li": "www.linkedin.com/company/massivebio/about",
+    "sw": "massivebio.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "Massive Bio is a health-tech company transforming how cancer patients access clinical trials.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Massive Bio (Fund I, Series A). Website: massivebio.com. LinkedIn: www.linkedin.com/company/massivebio/about. Massive Bio is a health-tech company transforming how cancer patients access clinical trials."
+  },
+  {
+    "id": 18,
+    "name": "Mori",
+    "initials": "MO",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "babymori.com",
+    "li": "linkedin.com/company/mori",
+    "sw": "babymori.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "Mori creates temperature-regulating sleepwear for babies, made from a sustainable blend, prioritizing the environment",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Mori (Fund I, Series A). Website: babymori.com. LinkedIn: linkedin.com/company/mori. Mori creates temperature-regulating sleepwear for babies, made from a sustainable blend, prioritizing the environment"
+  },
+  {
+    "id": 19,
+    "name": "Plant an App",
+    "initials": "PA",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "www.plantanapp.com",
+    "li": "www.linkedin.com/company/plant-an-app",
+    "sw": "www.plantanapp.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "Plant an App builds secure no-code portals for mission-critical government workflows and case management.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Plant an App (Fund I, Series A). Website: www.plantanapp.com. LinkedIn: www.linkedin.com/company/plant-an-app. Plant an App builds secure no-code portals for mission-critical government workflows and case management."
+  },
+  {
+    "id": 20,
+    "name": "Plum",
+    "initials": "PL",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "withplum.com",
+    "li": "www.linkedin.com/company/plum-fintech",
+    "sw": "withplum.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "Plum is a money management app that can be linked to your existing accounts. It offers tools such as spending categories…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Plum (Fund I, Series A). Website: withplum.com. LinkedIn: www.linkedin.com/company/plum-fintech. Plum is a money management app that can be linked to your existing accounts. It offers tools such as spending categories, bill reminders and automated deposits. It also offers competitive savings ‘pockets’ and an investing platform."
+  },
+  {
+    "id": 21,
+    "name": "Vivoo",
+    "initials": "VI",
+    "sector": "Fund I",
+    "stage": "Series A",
+    "domain": "www.vivoo.io",
+    "li": "www.linkedin.com/company/vivoo",
+    "sw": "www.vivoo.io",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "Vivoo is a wellness-tech innovation company that develops, improves, and offers personalized products using state-of-the…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Vivoo (Fund I, Series A). Website: www.vivoo.io. LinkedIn: www.linkedin.com/company/vivoo. Vivoo is a wellness-tech innovation company that develops, improves, and offers personalized products using state-of-the-art technology."
+  },
+  {
+    "id": 22,
+    "name": "Agave Games",
+    "initials": "AG",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.agavegames.com",
+    "li": "www.linkedin.com/company/agavegames/posts/?feedView=all",
+    "sw": "www.agavegames.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "Agave Games is a mobile gaming company that primarily focuses on casual puzzle genre.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Agave Games (Fund II, Series B). Website: www.agavegames.com. LinkedIn: www.linkedin.com/company/agavegames/posts/?feedView=all. Agave Games is a mobile gaming company that primarily focuses on casual puzzle genre."
+  },
+  {
+    "id": 23,
+    "name": "Arf/Huma",
+    "initials": "AR",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "arf.one",
+    "li": "www.linkedin.com/company/arf-one",
+    "sw": "arf.one",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "Arf is a liquidity platform for financial institutions in cross-border payments, offering short-term, revolving, and dig…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Arf/Huma (Fund II, Series B). Website: arf.one. LinkedIn: www.linkedin.com/company/arf-one. Arf is a liquidity platform for financial institutions in cross-border payments, offering short-term, revolving, and digital asset-based credit lines. "
+  },
+  {
+    "id": 24,
+    "name": "Aspect Health",
+    "initials": "AH",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.aspect-health.com",
+    "li": "www.linkedin.com/company/aspectapp/posts/?feedView=all",
+    "sw": "www.aspect-health.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "Aspect - a service for women’s metabolic health with an initial focus on PCOS, a syndrome that impacts 1 in 10 women in …",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Aspect Health (Fund II, Series B). Website: www.aspect-health.com. LinkedIn: www.linkedin.com/company/aspectapp/posts/?feedView=all. Aspect - a service for women’s metabolic health with an initial focus on PCOS, a syndrome that impacts 1 in 10 women in the US"
+  },
+  {
+    "id": 25,
+    "name": "Axoflow",
+    "initials": "AX",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "axoflow.com",
+    "li": "www.linkedin.com/company/axoflow",
+    "sw": "axoflow.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "Axoflow help security teams escape the burden of endless pipeline babysitting.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Axoflow (Fund II, Series B). Website: axoflow.com. LinkedIn: www.linkedin.com/company/axoflow. Axoflow help security teams escape the burden of endless pipeline babysitting."
+  },
+  {
+    "id": 26,
+    "name": "BLISKO",
+    "initials": "BL",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.bliskoedu.pl/sq/o-wioskach",
+    "li": "www.linkedin.com/company/blisko-thevillagenetwork/posts/?feedView=all",
+    "sw": "www.bliskoedu.pl/sq/o-wioskach",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "BLISKO (formerly The Village Network) is a network of nurseries and preschools based on respect for the child and play.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "BLISKO (Fund II, Series B). Website: www.bliskoedu.pl/sq/o-wioskach. LinkedIn: www.linkedin.com/company/blisko-thevillagenetwork/posts/?feedView=all. BLISKO (formerly The Village Network) is a network of nurseries and preschools based on respect for the child and play."
+  },
+  {
+    "id": 27,
+    "name": "Brainbase",
+    "initials": "BR",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "app.brainbase.com/en/login",
+    "li": "www.linkedin.com/company/brainbaseinc",
+    "sw": "app.brainbase.com/en/login",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "Brainbase helps teams unify their global licensing operations.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Brainbase (Fund II, Series B). Website: app.brainbase.com/en/login. LinkedIn: www.linkedin.com/company/brainbaseinc. Brainbase helps teams unify their global licensing operations."
+  },
+  {
+    "id": 28,
+    "name": "Cypher Games",
+    "initials": "CG",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.cyphergames.com",
+    "li": "www.linkedin.com/company/cyphergames",
+    "sw": "www.cyphergames.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "Cypher is a mobile interactive entertainment company founded by passionate gamers with a dream of building a global succ…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Cypher Games (Fund II, Series B). Website: www.cyphergames.com. LinkedIn: www.linkedin.com/company/cyphergames. Cypher is a mobile interactive entertainment company founded by passionate gamers with a dream of building a global success story."
+  },
+  {
+    "id": 29,
+    "name": "Datapad",
+    "initials": "DA",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "datapad.io",
+    "li": "www.linkedin.com/company/datapad-ai/?originalSubdomain=tr",
+    "sw": "datapad.io",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "Datapad provides AI-driven insights to help you stay ahead.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Datapad (Fund II, Series B). Website: datapad.io. LinkedIn: www.linkedin.com/company/datapad-ai/?originalSubdomain=tr. Datapad provides AI-driven insights to help you stay ahead."
+  },
+  {
+    "id": 30,
+    "name": "Daytona",
+    "initials": "DA",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.daytona.io",
+    "li": "www.linkedin.com/company/daytonaio/posts/?feedView=all",
+    "sw": "www.daytona.io",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "Daytona provides a secure, scalable infrastructure for executing AI-generated code. O",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Daytona (Fund II, Series B). Website: www.daytona.io. LinkedIn: www.linkedin.com/company/daytonaio/posts/?feedView=all. Daytona provides a secure, scalable infrastructure for executing AI-generated code. O"
+  },
+  {
+    "id": 31,
+    "name": "DiffuseDrive",
+    "initials": "DI",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "diffusedrive.com",
+    "li": "www.linkedin.com/company/diffusedrive/posts/?feedView=all",
+    "sw": "diffusedrive.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "Developing an End-To-End (E2E) automated data solution to help computer vision developers build better autonomous machin…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "DiffuseDrive (Fund II, Series B). Website: diffusedrive.com. LinkedIn: www.linkedin.com/company/diffusedrive/posts/?feedView=all. Developing an End-To-End (E2E) automated data solution to help computer vision developers build better autonomous machines faster by eliminating entire workflows in data infrastructure with generative AI to reduce time-to-market by 50%."
+  },
+  {
+    "id": 32,
+    "name": "Fal",
+    "initials": "FA",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "fal.ai/dashboard",
+    "li": "www.linkedin.com/company/features-and-labels/posts/?feedView=all",
+    "sw": "fal.ai/dashboard",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "Generative media platform for developers.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Fal (Fund II, Series B). Website: fal.ai/dashboard. LinkedIn: www.linkedin.com/company/features-and-labels/posts/?feedView=all. Generative media platform for developers."
+  },
+  {
+    "id": 33,
+    "name": "Feraset",
+    "initials": "FE",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.feraset.co",
+    "li": "www.linkedin.com/company/feraset/posts/?feedView=all",
+    "sw": "www.feraset.co",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "FERASET, a leading app company based in Istanbul, dedicated to building AI-powered apps with lasting impact.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Feraset (Fund II, Series B). Website: www.feraset.co. LinkedIn: www.linkedin.com/company/feraset/posts/?feedView=all. FERASET, a leading app company based in Istanbul, dedicated to building AI-powered apps with lasting impact."
+  },
+  {
+    "id": 34,
+    "name": "Fume (Newly: Latted)",
+    "initials": "F(",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.fumedev.com",
+    "li": "www.linkedin.com/company/latted",
+    "sw": "www.fumedev.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "Latted building a unified editor long AI video project. Generate and edit long AI videos from a single prompt",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Fume (Newly: Latted) (Fund II, Series B). Website: www.fumedev.com. LinkedIn: www.linkedin.com/company/latted. Latted building a unified editor long AI video project. Generate and edit long AI videos from a single prompt"
+  },
+  {
+    "id": 35,
+    "name": "Gurubase",
+    "initials": "GU",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "gurubase.io",
+    "li": "www.linkedin.com/company/gurubase/posts/?feedView=all",
+    "sw": "gurubase.io",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "Gurubase is a hallucination-resistant AI platform that enables organizations to deliver accurate and secure customer sup…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Gurubase (Fund II, Series B). Website: gurubase.io. LinkedIn: www.linkedin.com/company/gurubase/posts/?feedView=all. Gurubase is a hallucination-resistant AI platform that enables organizations to deliver accurate and secure customer support using their own knowledge"
+  },
+  {
+    "id": 36,
+    "name": "Handhold",
+    "initials": "HA",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "handhold.io",
+    "li": "www.linkedin.com/company/handholdio/posts/?feedView=all",
+    "sw": "handhold.io",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "Handhold builds multimodal AI agents that give tailored product demos & onboarding journeys to inbound leads, 24/7.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Handhold (Fund II, Series B). Website: handhold.io. LinkedIn: www.linkedin.com/company/handholdio/posts/?feedView=all. Handhold builds multimodal AI agents that give tailored product demos & onboarding journeys to inbound leads, 24/7."
+  },
+  {
+    "id": 37,
+    "name": "Heltia",
+    "initials": "HE",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.getheltia.com",
+    "li": "www.linkedin.com/company/getheltia",
+    "sw": "www.getheltia.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "Heltia yeni nesil çalışan destek platformudur. Psikolog, diyetisyen, fizyoterapist, çocuk gelişim uzmanı, doula gibi bir…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Heltia (Fund II, Series B). Website: www.getheltia.com. LinkedIn: www.linkedin.com/company/getheltia. Heltia yeni nesil çalışan destek platformudur. Psikolog, diyetisyen, fizyoterapist, çocuk gelişim uzmanı, doula gibi birçok farklı alandan uzmanı bir araya getiren Heltia, çalışanlarına destek olmak isteyen tüm şirketlere çözümler sunuyor."
+  },
+  {
+    "id": 38,
+    "name": "Integrated Finance",
+    "initials": "IF",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "integrated.fice",
+    "li": "www.linkedin.com/company/integratedfice/posts/?feedView=all",
+    "sw": "integrated.fice",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "Integrated Finance helps build, expand and manage your financial infrastructure",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Integrated Finance (Fund II, Series B). Website: integrated.fice. LinkedIn: www.linkedin.com/company/integratedfice/posts/?feedView=all. Integrated Finance helps build, expand and manage your financial infrastructure"
+  },
+  {
+    "id": 39,
+    "name": "intryc",
+    "initials": "IN",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.intryc.com",
+    "li": "www.linkedin.com/company/intryc/posts/?feedView=all",
+    "sw": "www.intryc.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "Intryc is the most complete quality and training platform for Human and AI CX teams. Multi-billion dollar companies and …",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "intryc (Fund II, Series B). Website: www.intryc.com. LinkedIn: www.linkedin.com/company/intryc/posts/?feedView=all. Intryc is the most complete quality and training platform for Human and AI CX teams. Multi-billion dollar companies and fast growing startups like Deel.com, Blueground, Fyxer, Factorial, and Preply use Intryc to monitor, evaluate, train, and improve every customer interaction and CX operations."
+  },
+  {
+    "id": 40,
+    "name": "Layer",
+    "initials": "LA",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.layer.ai",
+    "li": "www.linkedin.com/company/layerai/posts/?feedView=all",
+    "sw": "www.layer.ai",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "Layer powers creative production for performance-driven entertainment brands.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Layer (Fund II, Series B). Website: www.layer.ai. LinkedIn: www.linkedin.com/company/layerai/posts/?feedView=all. Layer powers creative production for performance-driven entertainment brands."
+  },
+  {
+    "id": 41,
+    "name": "Lonca",
+    "initials": "LO",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "lonca.co",
+    "li": "www.linkedin.com/company/loncawholesale/about",
+    "sw": "lonca.co",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "Lonca is the ultimate destination to reach the top-most suppliers in the largest wholesale clothing market in Turkey.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Lonca (Fund II, Series B). Website: lonca.co. LinkedIn: www.linkedin.com/company/loncawholesale/about. Lonca is the ultimate destination to reach the top-most suppliers in the largest wholesale clothing market in Turkey."
+  },
+  {
+    "id": 42,
+    "name": "Loom Games",
+    "initials": "LG",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.loomgames.com",
+    "li": "www.linkedin.com/company/loomgames",
+    "sw": "www.loomgames.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "Loom Games is a mobile game studio based in Istanbul, focused on creating innovative and highly engaging hybrid-casual p…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Loom Games (Fund II, Series B). Website: www.loomgames.com. LinkedIn: www.linkedin.com/company/loomgames. Loom Games is a mobile game studio based in Istanbul, focused on creating innovative and highly engaging hybrid-casual puzzle experiences."
+  },
+  {
+    "id": 43,
+    "name": "Nicky",
+    "initials": "NI",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.heynicky.com",
+    "li": "www.linkedin.com/company/heynicky",
+    "sw": "www.heynicky.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "Nicky AI is redefining construction project management with innovative voice & text assistant app, robust third-party in…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Nicky (Fund II, Series B). Website: www.heynicky.com. LinkedIn: www.linkedin.com/company/heynicky. Nicky AI is redefining construction project management with innovative voice & text assistant app, robust third-party integrations, and custom software solutions."
+  },
+  {
+    "id": 44,
+    "name": "Permify (acquired by FusionAuth)",
+    "initials": "P(",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "permify.co",
+    "li": "www.linkedin.com/company/permifyco",
+    "sw": "permify.co",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "Permify is an open-source authorization service for creating fine-grained and scalable authorization systems.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Permify (acquired by FusionAuth) (Fund II, Series B). Website: permify.co. LinkedIn: www.linkedin.com/company/permifyco. Permify is an open-source authorization service for creating fine-grained and scalable authorization systems."
+  },
+  {
+    "id": 45,
+    "name": "Pine Games",
+    "initials": "PG",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.pinegames.com",
+    "li": "www.linkedin.com/company/pinegames",
+    "sw": "www.pinegames.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "Pine Games is a mobile gaming company driven by a passion for creating impactful experiences with widespread appeal.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Pine Games (Fund II, Series B). Website: www.pinegames.com. LinkedIn: www.linkedin.com/company/pinegames. Pine Games is a mobile gaming company driven by a passion for creating impactful experiences with widespread appeal."
+  },
+  {
+    "id": 46,
+    "name": "Polymet",
+    "initials": "PO",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "polymet.ai",
+    "li": "www.linkedin.com/company/polymet-ai/posts/?feedView=all",
+    "sw": "polymet.ai",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "Polymet is an AI Product Designer, helps teams create well-designed user interfaces and prototypes without any design ex…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Polymet (Fund II, Series B). Website: polymet.ai. LinkedIn: www.linkedin.com/company/polymet-ai/posts/?feedView=all. Polymet is an AI Product Designer, helps teams create well-designed user interfaces and prototypes without any design experience."
+  },
+  {
+    "id": 47,
+    "name": "Pythagora",
+    "initials": "PY",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.pythagora.ai",
+    "li": "www.linkedin.com/company/pythagora-gpt-pilot",
+    "sw": "www.pythagora.ai",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "Pythagora is the world's first all-in-one AI development platform, which can help you get from idea to production-ready …",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Pythagora (Fund II, Series B). Website: www.pythagora.ai. LinkedIn: www.linkedin.com/company/pythagora-gpt-pilot. Pythagora is the world's first all-in-one AI development platform, which can help you get from idea to production-ready app by talking to users."
+  },
+  {
+    "id": 48,
+    "name": "Refine",
+    "initials": "RE",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "refine.dev",
+    "li": "www.linkedin.com/company/refine-dev/posts/?feedView=all",
+    "sw": "refine.dev",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "A React Framework for building  internal tools, admin panels, dashboards & B2B apps with unmatched flexibilty.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Refine (Fund II, Series B). Website: refine.dev. LinkedIn: www.linkedin.com/company/refine-dev/posts/?feedView=all. A React Framework for building  internal tools, admin panels, dashboards & B2B apps with unmatched flexibilty."
+  },
+  {
+    "id": 49,
+    "name": "Synnada",
+    "initials": "SY",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.synnada.ai",
+    "li": "www.linkedin.com/company/synnada",
+    "sw": "www.synnada.ai",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "Synnada is rethinking intelligent systems from first principles; designing cleaner primitives, sharper tools, and simple…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Synnada (Fund II, Series B). Website: www.synnada.ai. LinkedIn: www.linkedin.com/company/synnada. Synnada is rethinking intelligent systems from first principles; designing cleaner primitives, sharper tools, and simpler rules."
+  },
+  {
+    "id": 50,
+    "name": "The Swarm",
+    "initials": "TS",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.theswarm.com",
+    "li": "www.linkedin.com/company/wearetheswarm/posts/?feedView=all",
+    "sw": "www.theswarm.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "The Swarm curates a rich dataset of 580M profiles with daily job changes, 100M companies with fundraising data, and a un…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "The Swarm (Fund II, Series B). Website: www.theswarm.com. LinkedIn: www.linkedin.com/company/wearetheswarm/posts/?feedView=all. The Swarm curates a rich dataset of 580M profiles with daily job changes, 100M companies with fundraising data, and a unique relationship mapping AI engine for builders and investors."
+  },
+  {
+    "id": 51,
+    "name": "Truemeter",
+    "initials": "TR",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "truemeter.com/?utility-optimization=&_stsgnoredir=1",
+    "li": "www.linkedin.com/company/ecotrove",
+    "sw": "truemeter.com/?utility-optimization=&_stsgnoredir=1",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "TrueMeter's AI Utility Agent pays, tracks and lowers bills for multi-location businesses.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Truemeter (Fund II, Series B). Website: truemeter.com/?utility-optimization=&_stsgnoredir=1. LinkedIn: www.linkedin.com/company/ecotrove. TrueMeter's AI Utility Agent pays, tracks and lowers bills for multi-location businesses."
+  },
+  {
+    "id": 52,
+    "name": "Ubicloud",
+    "initials": "UB",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.ubicloud.com",
+    "li": "www.linkedin.com/company/ubicloud",
+    "sw": "www.ubicloud.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "Ubicloud is an open source cloud that can run anywhere. You can use our managed service to reduce your cloud spend by 3–…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Ubicloud (Fund II, Series B). Website: www.ubicloud.com. LinkedIn: www.linkedin.com/company/ubicloud. Ubicloud is an open source cloud that can run anywhere. You can use our managed service to reduce your cloud spend by 3–10x, or self-host Ubicloud to control your own cloud."
+  },
+  {
+    "id": 53,
+    "name": "Vidoc",
+    "initials": "VI",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.vidocsecurity.com",
+    "li": "www.linkedin.com/company/vidoc-security-lab/posts/?feedView=all",
+    "sw": "www.vidocsecurity.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "Vidoc Security Lab helps companies secure code written by both humans and AI. As more developers rely on AI tools and op…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Vidoc (Fund II, Series B). Website: www.vidocsecurity.com. LinkedIn: www.linkedin.com/company/vidoc-security-lab/posts/?feedView=all. Vidoc Security Lab helps companies secure code written by both humans and AI. As more developers rely on AI tools and open-source packages, new types of bugs and risks are slipping through the cracks."
+  },
+  {
+    "id": 54,
+    "name": "Yoneda Labs",
+    "initials": "YL",
+    "sector": "Fund II",
+    "stage": "Series B",
+    "domain": "www.yonedalabs.com",
+    "li": "www.linkedin.com/company/yonedalabs",
+    "sw": "www.yonedalabs.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "Yoneda Labs provides software to help chemists optimize reactions. When chemists make a drug or material, we help them f…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Yoneda Labs (Fund II, Series B). Website: www.yonedalabs.com. LinkedIn: www.linkedin.com/company/yonedalabs. Yoneda Labs provides software to help chemists optimize reactions. When chemists make a drug or material, we help them figure out the best reaction parameters such as temperature, concentration, and catalyst."
+  },
+  {
+    "id": 55,
+    "name": "Aurion",
+    "initials": "AU",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "",
+    "li": "",
+    "sw": "",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "Aurion is building an AI-first professional services platform, starting with accounting, in one of Europe’s largest yet …",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Aurion (Fund III, Seed). Website: . LinkedIn: . Aurion is building an AI-first professional services platform, starting with accounting, in one of Europe’s largest yet most fragmented sectors."
+  },
+  {
+    "id": 56,
+    "name": "Axiology",
+    "initials": "AX",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "www.axiology.xyz",
+    "li": "www.linkedin.com/company/axiologyxyz/posts/?feedView=all",
+    "sw": "www.axiology.xyz",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "Axiology is a provider of capital market infrastructure. Develop solutions for the issuance, custody, settlement, and tr…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Axiology (Fund III, Seed). Website: www.axiology.xyz. LinkedIn: www.linkedin.com/company/axiologyxyz/posts/?feedView=all. Axiology is a provider of capital market infrastructure. Develop solutions for the issuance, custody, settlement, and trading of tokenised fixed-income instruments."
+  },
+  {
+    "id": 57,
+    "name": "Bold Games",
+    "initials": "BG",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "bold.games",
+    "li": "www.linkedin.com/company/boldgame",
+    "sw": "bold.games",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "New-generation casual puzzle gaming studio based in Istanbul.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Bold Games (Fund III, Seed). Website: bold.games. LinkedIn: www.linkedin.com/company/boldgame. New-generation casual puzzle gaming studio based in Istanbul."
+  },
+  {
+    "id": 58,
+    "name": "Caretta",
+    "initials": "CA",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "www.caretta.so",
+    "li": "www.linkedin.com/company/carettaai/about",
+    "sw": "www.caretta.so",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "Caretta is a realtime AI that enables salespeople to handle the toughest product conversations with confidence in live c…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Caretta (Fund III, Seed). Website: www.caretta.so. LinkedIn: www.linkedin.com/company/carettaai/about. Caretta is a realtime AI that enables salespeople to handle the toughest product conversations with confidence in live calls. It learns from your documents, website, documentation, blogs, chats, internal playbooks, and your best performing reps."
+  },
+  {
+    "id": 59,
+    "name": "Circle Games",
+    "initials": "CG",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "circle.gs",
+    "li": "www.linkedin.com/company/circle-games/posts/?feedView=all",
+    "sw": "circle.gs",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "Circle Games is an Istanbul-based mobile gaming company dedicated to creating high-quality experiences with user-centere…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Circle Games (Fund III, Seed). Website: circle.gs. LinkedIn: www.linkedin.com/company/circle-games/posts/?feedView=all. Circle Games is an Istanbul-based mobile gaming company dedicated to creating high-quality experiences with user-centered design."
+  },
+  {
+    "id": 60,
+    "name": "Forithmus",
+    "initials": "FO",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "forithmus.com",
+    "li": "www.linkedin.com/company/forithmus",
+    "sw": "forithmus.com",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "Forithmus develops large-scale datasets, foundation models, and research infrastructure for medical imaging, while colla…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Forithmus (Fund III, Seed). Website: forithmus.com. LinkedIn: www.linkedin.com/company/forithmus. Forithmus develops large-scale datasets, foundation models, and research infrastructure for medical imaging, while collaborating openly with the global research and clinical community."
+  },
+  {
+    "id": 61,
+    "name": "Imbik AI",
+    "initials": "IA",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "",
+    "li": "",
+    "sw": "",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "Imbik AI — Fund III portfolio company.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Imbik AI (Fund III, Seed). Website: . LinkedIn: . "
+  },
+  {
+    "id": 62,
+    "name": "Luron AI",
+    "initials": "LA",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "www.luron.ai",
+    "li": "www.linkedin.com/company/luron-ai/posts/?feedView=all",
+    "sw": "www.luron.ai",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "Luron AI is the always-on voice employee that reimagines how customers interact with businesses.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Luron AI (Fund III, Seed). Website: www.luron.ai. LinkedIn: www.linkedin.com/company/luron-ai/posts/?feedView=all. Luron AI is the always-on voice employee that reimagines how customers interact with businesses."
+  },
+  {
+    "id": 63,
+    "name": "Mandel AI",
+    "initials": "MA",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "www.mandel.ai",
+    "li": "www.linkedin.com/company/mandel-ai",
+    "sw": "www.mandel.ai",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 3,
+    "snippet": "Mandel AI deploys autonomous email agents that proactively extract data and message suppliers.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Mandel AI (Fund III, Seed). Website: www.mandel.ai. LinkedIn: www.linkedin.com/company/mandel-ai. Mandel AI deploys autonomous email agents that proactively extract data and message suppliers."
+  },
+  {
+    "id": 64,
+    "name": "Mission Control Games",
+    "initials": "MC",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "missioncontrol.gs",
+    "li": "www.linkedin.com/company/mission-control-games/about",
+    "sw": "missioncontrol.gs",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 4,
+    "snippet": "Mission Control Games — Fund III portfolio company.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Mission Control Games (Fund III, Seed). Website: missioncontrol.gs. LinkedIn: www.linkedin.com/company/mission-control-games/about. "
+  },
+  {
+    "id": 65,
+    "name": "Monogram AI",
+    "initials": "MA",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "www.monogram.ai",
+    "li": "www.linkedin.com/company/monogram-ai/about",
+    "sw": "www.monogram.ai",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 5,
+    "snippet": "User Interface for the AGI",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Monogram AI (Fund III, Seed). Website: www.monogram.ai. LinkedIn: www.linkedin.com/company/monogram-ai/about. User Interface for the AGI"
+  },
+  {
+    "id": 66,
+    "name": "Patientdesk AI",
+    "initials": "PA",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "www.patientdesk.ai",
+    "li": "www.linkedin.com/company/patientdesk-ai/about",
+    "sw": "www.patientdesk.ai",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 0,
+    "snippet": "Patientdesk is an AI bookings system that helps healthcare practices make more money. We do this by handling bookings, p…",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Patientdesk AI (Fund III, Seed). Website: www.patientdesk.ai. LinkedIn: www.linkedin.com/company/patientdesk-ai/about. Patientdesk is an AI bookings system that helps healthcare practices make more money. We do this by handling bookings, payments, and insurance to fill up a provider's calendar with high value appointments."
+  },
+  {
+    "id": 67,
+    "name": "Reflow",
+    "initials": "RE",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "www.reflow.ai",
+    "li": "www.linkedin.com/company/reflowai/posts/?feedView=all",
+    "sw": "www.reflow.ai",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 1,
+    "snippet": "A workforce and workflow intelligence platform that helps teams understand and improve how work gets done.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Reflow (Fund III, Seed). Website: www.reflow.ai. LinkedIn: www.linkedin.com/company/reflowai/posts/?feedView=all. A workforce and workflow intelligence platform that helps teams understand and improve how work gets done."
+  },
+  {
+    "id": 68,
+    "name": "Wonder Games",
+    "initials": "WG",
+    "sector": "Fund III",
+    "stage": "Seed",
+    "domain": "",
+    "li": "www.linkedin.com/company/wonder.games",
+    "sw": "",
+    "status": "active",
+    "traffic": "—",
+    "roles": 0,
+    "pal": 2,
+    "snippet": "Wonder Games is a next-gen casual puzzle studio building premium, long-lasting games around overlooked mechanics.",
+    "score": "—",
+    "scoreSub": "tracking started",
+    "signals": [],
+    "hiring": [],
+    "context": "Wonder Games (Fund III, Seed). Website: . LinkedIn: www.linkedin.com/company/wonder.games. Wonder Games is a next-gen casual puzzle studio building premium, long-lasting games around overlooked mechanics."
+  }
+];
+
+let currentCo=null,chatHistory=[],listFilter='all';
+let highlights=JSON.parse(localStorage.getItem('pi_highlights')||'{}');
+
+function getApiKey(){return localStorage.getItem('pi_apikey')||''}
+function saveHighlights(){localStorage.setItem('pi_highlights',JSON.stringify(highlights))}
+
+function renderQuickStats(){
+  const total=companies.length;
+  const starred=companies.filter(c=>highlights[c.id]?.starred).length;
+  const signals=companies.reduce((n,c)=>n+(c.signals?.length||0),0);
+  const hiring=companies.reduce((n,c)=>n+(c.roles||0),0);
+  const withSig=companies.filter(c=>c.signals?.length>0).length;
+  const f1=companies.filter(c=>c.sector==='Fund I').length;
+  const f2=companies.filter(c=>c.sector==='Fund II').length;
+  const f3=companies.filter(c=>c.sector==='Fund III').length;
+  const hiringCos=companies.filter(c=>c.roles>0).length;
+  document.getElementById('qs-total').textContent=total;
+  document.getElementById('qs-funds').textContent=`F1: ${f1} · F2: ${f2} · F3: ${f3}`;
+  document.getElementById('qs-starred').textContent=starred;
+  document.getElementById('qs-signals').textContent=signals;
+  document.getElementById('qs-hiring').textContent=hiring;
+  document.getElementById('qs-hiring-sub').textContent=`${hiringCos} companies hiring`;
+  document.getElementById('qs-active').textContent=withSig;
+}
+
+function renderGrid(filter){
+  const grid=document.getElementById('co-grid');
+  const list=filter==='all'?companies
+    :filter.startsWith('Fund')?companies.filter(c=>c.sector===filter)
+    :filter==='starred'?companies.filter(c=>highlights[c.id]?.starred)
+    :companies;
+  renderQuickStats();
+  if(!list.length){grid.innerHTML='<div class="empty-state">No companies found.</div>';return;}
+  grid.innerHTML=list.map(c=>{
+    const pal=PALETTES[c.pal%PALETTES.length];
+    const isStarred=highlights[c.id]?.starred||false;
+    return `<div class="co-card${isStarred?' starred':''}" id="card-${c.id}">
+      <div class="co-card-actions">
+        <button class="star-btn${isStarred?' on':''}" onclick="event.stopPropagation();toggleStar(${c.id})" title="${isStarred?'Unstar':'Star'}">${isStarred?'⭐':'☆'}</button>
+        <button class="del-btn" onclick="event.stopPropagation();deleteCo(${c.id})" title="Delete">✕</button>
+      </div>
+      <div class="co-card-body" onclick="openCo(${c.id})">
+        <div class="co-av" style="background:${pal.bg};color:${pal.tc}">${c.initials}</div>
+        <div class="co-card-name">${c.name}</div>
+        <div class="co-card-meta">${c.sector} · ${c.stage}</div>
+        <div class="co-snippet">${c.snippet}</div>
+      </div>
+      <div class="co-card-footer" onclick="openCo(${c.id})">
+        <span class="co-pill co-pill-fund">${c.sector}</span>
+        <span class="co-pill co-pill-stage">${c.stage}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterList(f,el){
+  listFilter=f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  renderGrid(f);
+}
+
+function toggleStar(id){
+  if(!highlights[id])highlights[id]={};
+  highlights[id].starred=!highlights[id].starred;
+  saveHighlights();
+  renderGrid(listFilter);
+}
+
+function openCo(id){
+  currentCo=id;chatHistory=[];
+  const c=companies.find(x=>x.id===id);
+  const pal=PALETTES[c.pal%PALETTES.length];
+  document.getElementById('page-list').classList.remove('active');
+  document.getElementById('page-detail').classList.add('active');
+  document.getElementById('back-btn').style.display='flex';
+  document.getElementById('refresh-btn').style.display='inline-flex';
+  document.getElementById('tb-count') && (document.getElementById('tb-count').textContent=c.name);
+
+  const av=document.getElementById('dh-av');
+  av.textContent=c.initials;av.style.background=pal.bg;av.style.color=pal.tc;
+  document.getElementById('dh-name').textContent=c.name;
+  document.getElementById('dh-sector').textContent=c.sector;
+  document.getElementById('dh-stage').textContent=c.stage;
+  document.getElementById('dh-web').textContent=c.domain||c.name;
+  document.getElementById('dh-web').href=c.domain?'https://'+c.domain:'#';
+  document.getElementById('dh-li').href=c.li?'https://'+c.li:'#';
+  document.getElementById('dh-sw').href='https://www.similarweb.com/website/'+(c.sw||c.domain);
+
+  const sEl=document.getElementById('d-score');
+  sEl.textContent=c.score;
+  sEl.className='stat-val '+(parseFloat(c.score)>=6?'up':'');
+  document.getElementById('d-score-sub').textContent=c.scoreSub||'';
+  const tEl=document.getElementById('d-traffic');
+  tEl.textContent=c.traffic;
+  tEl.className='stat-val '+(c.traffic.startsWith('+')?'up':c.traffic==='—'?'':'dn');
+  document.getElementById('d-roles').textContent=c.roles;
+  document.getElementById('d-roles-sub').textContent=c.hiring?.length?c.hiring[0].dept+' and more':'no open roles';
+
+  renderSigTabs(c);
+
+  const msgs=document.getElementById('chat-msgs');
+  msgs.innerHTML='';
+  addBubble('ai',`Tracking <strong>${c.name}</strong>. ${c.snippet} What would you like to know?`);
+  window.scrollTo(0,0);
+}
+
+function goHome(){
+  document.getElementById('page-detail').classList.remove('active');
+  document.getElementById('page-list').classList.add('active');
+  document.getElementById('back-btn').style.display='none';
+  document.getElementById('refresh-btn').style.display='none';
+  renderGrid(listFilter);
+}
+
+function sigItemHTML(s){
+  const dotColor={news:'#378add',company:'#5dba8a',founder:'#a888d4',hiring:'#c49a5a',web:'#888780'}[s.type]||'#888780';
+  return `<div class="sig-item">
+    <div class="sig-dot" style="background:${dotColor}"></div>
+    <div class="sig-body">
+      <div class="sig-title">${s.title}</div>
+      <div class="sig-meta">${s.time||'—'}</div>
+    </div>
+    ${s.score?`<span class="sig-score">${s.score}/10</span>`:''}
+  </div>`;
+}
+
+function renderSigTabs(c){
+  const company=c.signals?.filter(s=>s.type==='company'||(s.type==='li'&&s.label==='Company LinkedIn'))||[];
+  const founder=c.signals?.filter(s=>s.type==='founder'||(s.type==='li'&&s.label!=='Company LinkedIn')||s.type==='linkedin')||[];
+  const hiring=c.hiring||[];
+  document.getElementById('tc-company').textContent=company.length;
+  document.getElementById('tc-founder').textContent=founder.length;
+  document.getElementById('tc-hiring').textContent=hiring.length;
+  const empty='<div class="sig-empty">No updates yet — signals will appear here as tracking begins.</div>';
+  document.getElementById('sp-company').innerHTML=company.length?company.map(sigItemHTML).join(''):empty;
+  document.getElementById('sp-founder').innerHTML=founder.length?founder.map(sigItemHTML).join(''):empty;
+  document.getElementById('sp-hiring').innerHTML=hiring.length
+    ?`<div class="hire-grid">${hiring.map(h=>`<div class="hire-item"><div class="hire-title">${h.title}</div><div class="hire-dept">${h.dept}</div></div>`).join('')}</div>`
+    :empty;
+  document.querySelectorAll('.sig-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sig-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.sig-tab').classList.add('active');
+  document.getElementById('sp-news').classList.add('active');
+  fetchGoogleNews(c);
+}
+
+async function fetchGoogleNews(c){
+  const panel = document.getElementById('sp-news');
+  panel.innerHTML = '<div class="news-loading"><div class="ld-dots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div> Fetching latest news…</div>';
+  
+  const query = encodeURIComponent(c.name);
+  const rssUrl = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`;
+  const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=20`;
+  
+  try {
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    
+    if (!data.items || data.items.length === 0) {
+      panel.innerHTML = '<div class="sig-empty">No news found for this company yet.</div>';
+      document.getElementById('tc-news').textContent = '0';
+      return;
+    }
+    
+    const items = data.items;
+    document.getElementById('tc-news').textContent = items.length;
+    
+    panel.innerHTML = items.map(item => {
+      const date = new Date(item.pubDate);
+      const timeAgo = getTimeAgo(date);
+      const source = item.author || extractSource(item.link) || 'News';
+      return `<div class="news-item">
+        <a class="news-title" href="${item.link}" target="_blank" rel="noopener">${item.title}</a>
+        <div class="news-meta">
+          <span class="news-source">${source}</span>
+          <span>·</span>
+          <span>${timeAgo}</span>
+        </div>
+      </div>`;
+    }).join('');
+    
+  } catch(e) {
+    panel.innerHTML = '<div class="sig-empty">Could not load news. Check your connection and try again.</div>';
+  }
+}
+
+function getTimeAgo(date){
+  const diff = Math.floor((Date.now() - date) / 1000);
+  if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  if (diff < 604800) return Math.floor(diff/86400) + 'd ago';
+  return date.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+}
+
+function extractSource(url){
+  try { return new URL(url).hostname.replace('www.',''); } catch(e){ return ''; }
+}
+
+function switchSigTab(name,el){
+  document.querySelectorAll('.sig-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sig-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('sp-'+name).classList.add('active');
+}
+
+function addBubble(role,html){
+  const msgs=document.getElementById('chat-msgs');
+  const d=document.createElement('div');
+  d.className='msg '+(role==='user'?'u':'');
+  d.innerHTML=role==='ai'
+    ?`<div class="m-av ai-av">AI</div><div class="bubble">${html}</div>`
+    :`<div class="bubble">${html}</div><div class="m-av u-av">You</div>`;
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function addLoading(){
+  const msgs=document.getElementById('chat-msgs');
+  const d=document.createElement('div');d.className='msg';d.id='ld-msg';
+  d.innerHTML=`<div class="m-av ai-av">AI</div><div class="bubble"><div class="ld-dots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div></div>`;
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function ask(q){document.getElementById('chat-inp').value=q;await sendMsg();}
+
+async function sendMsg(){
+  const inp=document.getElementById('chat-inp');
+  const q=inp.value.trim();
+  if(!q||!currentCo)return;
+  inp.value='';
+  const apiKey=getApiKey();
+  if(!apiKey){addBubble('ai','Please add your Anthropic API key in Settings.');return;}
+  addBubble('user',q);
+  chatHistory.push({role:'user',content:q});
+  addLoading();
+  const c=companies.find(x=>x.id===currentCo);
+  const system=`You are an AI investment analyst for a VC fund. Intelligence on ${c.name}: ${c.context}. Signals: ${c.signals?.map(s=>s.type+': '+s.title).join('; ')||'none'}. Open roles: ${c.hiring?.map(h=>h.title).join(', ')||'none'}. Traffic: ${c.traffic}. Answer in 2-4 sentences. Be direct. No markdown symbols.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system,messages:chatHistory})
+    });
+    const data=await res.json();
+    document.getElementById('ld-msg')?.remove();
+    if(data.error){addBubble('ai','API error: '+data.error.message);return;}
+    const reply=data.content?.[0]?.text||'No response.';
+    chatHistory.push({role:'assistant',content:reply});
+    addBubble('ai',reply.replace(/\n/g,'<br>'));
+  }catch(e){
+    document.getElementById('ld-msg')?.remove();
+    addBubble('ai','Connection error. Check your API key.');
+  }
+}
+
+function deleteCo(id){
+  const c=companies.find(x=>x.id===id);
+  if(!confirm(`Delete "${c.name}"?`))return;
+  companies=companies.filter(x=>x.id!==id);
+  renderGrid(listFilter);
+  showToast(c.name+' removed');
+}
+
+function openAdd(){document.getElementById('add-modal').classList.add('open');}
+function closeAdd(){document.getElementById('add-modal').classList.remove('open');}
+
+function addCompany(){
+  const name=document.getElementById('f-name').value.trim();
+  const web=document.getElementById('f-web').value.trim();
+  if(!name||!web){showToast('Name and website required');return;}
+  const initials=name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const domain=web.replace(/https?:\/\//,'').replace(/\/$/,'');
+  const li=document.getElementById('f-li').value.replace(/https?:\/\//,'');
+  const sw=document.getElementById('f-sw').value||domain;
+  const newId=Math.max(...companies.map(c=>c.id))+1;
+  companies.push({
+    id:newId,name,initials,
+    sector:document.getElementById('f-fund').value,
+    stage:document.getElementById('f-stage').value,
+    domain,li,sw,status:'active',traffic:'—',roles:0,
+    pal:newId%6,
+    snippet:document.getElementById('f-desc').value||name+' — tracking started.',
+    score:'—',scoreSub:'tracking started',signals:[],hiring:[],
+    context:`${name}. Website: ${domain}. ${document.getElementById('f-desc').value}`
+  });
+  closeAdd();
+  ['f-name','f-sector','f-web','f-li','f-sw','f-desc'].forEach(id=>document.getElementById(id).value='');
+  renderGrid(listFilter);
+  showToast(name+' added');
+}
+
+function openSettings(){document.getElementById('settings-modal').classList.add('open');document.getElementById('s-apikey').value=getApiKey();}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
+function saveSettings(){
+  localStorage.setItem('pi_apikey',document.getElementById('s-apikey').value.trim());
+  closeSettings();checkApiKey();showToast('API key saved');
+}
+
+function checkApiKey(){
+  document.getElementById('api-banner').style.display=getApiKey()?'none':'flex';
+}
+
+function refreshSignals(){
+  const btn=document.getElementById('refresh-btn');
+  btn.textContent='↻ Refreshing…';btn.disabled=true;
+  setTimeout(()=>{btn.textContent='↻ Refresh';btn.disabled=false;showToast('Signals refreshed');},1800);
+}
+
+function saveEmail(){
+  const v=document.getElementById('email-inp').value.trim();
+  if(!v||!v.includes('@')){showToast('Enter a valid email');return;}
+  localStorage.setItem('pi_email_'+currentCo,v);
+  showToast('Email saved');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+checkApiKey();
+renderGrid('all');
+</script>
+</body>
+</html>
